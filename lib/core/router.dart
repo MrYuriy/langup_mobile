@@ -6,10 +6,10 @@ import '../features/auth/auth_controller.dart';
 import '../features/auth/language_gate_screen.dart';
 import '../features/auth/login_screen.dart';
 import '../features/auth/splash_screen.dart';
+import '../features/dashboard/dashboard_screen.dart';
 import '../features/home/home_screen.dart';
 import '../features/practice/practice_screen.dart';
 import '../features/review/review_screen.dart';
-import '../features/shell/coming_soon_screen.dart';
 import '../features/shell/home_shell.dart';
 import '../features/vocabulary/vocabulary_screen.dart';
 import '../features/vocabulary/word_detail_screen.dart';
@@ -67,10 +67,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             GoRoute(path: '/review', builder: (_, _) => const ReviewScreen()),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(
-                path: '/dashboard',
-                builder: (_, _) => const ComingSoonScreen(
-                    title: 'Dashboard', phase: 'Phase 5')),
+            GoRoute(path: '/dashboard', builder: (_, _) => const DashboardScreen()),
           ]),
           StatefulShellBranch(routes: [
             GoRoute(path: '/profile', builder: (_, _) => const HomeScreen()),

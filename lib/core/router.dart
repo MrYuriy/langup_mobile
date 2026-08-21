@@ -7,6 +7,7 @@ import '../features/auth/language_gate_screen.dart';
 import '../features/auth/login_screen.dart';
 import '../features/auth/splash_screen.dart';
 import '../features/home/home_screen.dart';
+import '../features/practice/practice_screen.dart';
 import '../features/shell/coming_soon_screen.dart';
 import '../features/shell/home_shell.dart';
 import '../features/vocabulary/vocabulary_screen.dart';
@@ -59,10 +60,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             GoRoute(path: '/words', builder: (_, _) => const VocabularyScreen()),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(
-                path: '/practice',
-                builder: (_, _) => const ComingSoonScreen(
-                    title: 'Practice', phase: 'Phase 3')),
+            GoRoute(path: '/practice', builder: (_, _) => const PracticeScreen()),
           ]),
           StatefulShellBranch(routes: [
             GoRoute(

@@ -52,6 +52,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  Future<void> _google() async {
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      await ref.read(authControllerProvider.notifier).signInWithGoogle();
+      // On success the router redirects.
+    } on AuthException catch (e) {
+      setState(() => _error = e.message);
+    } catch (_) {
+      setState(() => _error = 'Google Sign-In failed. Try again.');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   Future<void> _forgot() async {
     final email = _email.text.trim();
     if (email.isEmpty) {
@@ -163,13 +180,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           : 'Create account'),
                     ),
                     const Divider(height: 32),
-                    // Google Sign-In is wired in a later step: it needs Android
-                    // (SHA-1 + google-services.json) and iOS OAuth client setup
-                    // before the button can work.
+                    // Requires an Android OAuth client (package name + signing
+                    // SHA-1) / iOS client in the same Google Cloud project — see
+                    // the mobile README.
                     OutlinedButton.icon(
-                      onPressed: null,
+                      onPressed: _busy ? null : _google,
                       icon: const Icon(Icons.g_mobiledata),
-                      label: const Text('Continue with Google (setup pending)'),
+                      label: const Text('Continue with Google'),
                     ),
                   ],
                 ),

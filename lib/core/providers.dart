@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../features/auth/auth_controller.dart';
 import '../features/auth/auth_repository.dart';
+import '../features/auth/google_auth_service.dart';
 import 'api_client.dart';
 import 'token_store.dart';
 
@@ -18,11 +19,15 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
   );
 });
 
+final googleAuthServiceProvider =
+    Provider<GoogleAuthService>((ref) => GoogleAuthService());
+
 final authControllerProvider =
     StateNotifierProvider<AuthController, AuthState>((ref) {
   return AuthController(
     ref.watch(authRepositoryProvider),
     ref.watch(apiClientProvider),
     ref.watch(tokenStoreProvider),
+    ref.watch(googleAuthServiceProvider),
   );
 });

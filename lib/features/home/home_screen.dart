@@ -21,6 +21,12 @@ class HomeScreen extends ConsumerWidget {
         title: const Text('LangUp'),
         actions: [
           IconButton(
+            tooltip: 'Refresh',
+            icon: const Icon(Icons.refresh),
+            onPressed: () =>
+                ref.read(authControllerProvider.notifier).refreshUser(),
+          ),
+          IconButton(
             tooltip: 'Sign out',
             icon: const Icon(Icons.logout),
             onPressed: () => ref.read(authControllerProvider.notifier).logout(),
@@ -35,6 +41,11 @@ class HomeScreen extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                if (!(user?.isEmailVerified ?? true))
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 16),
+                    child: _VerifyBanner(),
+                  ),
                 CircleAvatar(
                   radius: 36,
                   child: Text(initial.toUpperCase(),
@@ -68,6 +79,61 @@ class HomeScreen extends ConsumerWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Prompts an unverified account to confirm its email. Practice is gated behind
+/// verification on the backend (403 from `/exercises/next`), so surfacing this
+/// early matters.
+class _VerifyBanner extends ConsumerStatefulWidget {
+  const _VerifyBanner();
+
+  @override
+  ConsumerState<_VerifyBanner> createState() => _VerifyBannerState();
+}
+
+class _VerifyBannerState extends ConsumerState<_VerifyBanner> {
+  bool _busy = false;
+
+  Future<void> _resend() async {
+    setState(() => _busy = true);
+    String message;
+    try {
+      final sent = await ref.read(authControllerProvider.notifier).resendVerification();
+      message = sent ? 'Verification email sent.' : 'Already verified.';
+    } catch (_) {
+      message = 'Could not send the email. Try again.';
+    }
+    if (!mounted) return;
+    setState(() => _busy = false);
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: scheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          const Expanded(
+            child: Text('Confirm your email to unlock practice.'),
+          ),
+          TextButton(
+            onPressed: _busy ? null : _resend,
+            child: _busy
+                ? const SizedBox(
+                    height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                : const Text('Resend'),
+          ),
+        ],
       ),
     );
   }

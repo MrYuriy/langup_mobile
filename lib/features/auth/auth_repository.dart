@@ -59,6 +59,15 @@ class AuthRepository {
     return User.fromJson(_asMap(resp.data));
   }
 
+  /// Re-send the verification email to the signed-in user. Returns true when a
+  /// message was sent, false when the address is already verified.
+  Future<bool> resendVerification() async {
+    final resp = await _dio.post('/auth/verify-email/resend');
+    _ensureOk(resp, fallback: 'Could not send the email');
+    final data = resp.data;
+    return data is Map && data['status'] == 'sent';
+  }
+
   Future<void> logout() async {
     final refresh = _tokens.refresh;
     await _tokens.clear();

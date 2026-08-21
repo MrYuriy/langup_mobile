@@ -1,0 +1,121 @@
+import 'package:dio/dio.dart';
+
+import 'config.dart';
+import 'token_store.dart';
+
+/// Central HTTP client.
+///
+/// Mirrors the web cabinet's `api.js`: every request carries the Bearer access
+/// token, and a 401 triggers a single refresh + retry. Refresh tokens ROTATE on
+/// the server — each one is single-use and replaying a spent token is treated as
+/// theft and kills every session — so two concurrent 401s must never each fire
+/// their own refresh. All of them await one shared refresh call (single-flight).
+class ApiClient {
+  ApiClient(this.tokens) {
+    dio = Dio(
+      BaseOptions(
+        baseUrl: AppConfig.apiBaseUrl,
+        connectTimeout: const Duration(seconds: 15),
+        receiveTimeout: const Duration(seconds: 30),
+        headers: {'Content-Type': 'application/json'},
+        // We handle status codes ourselves; don't throw on <500 so callers can
+        // read 4xx bodies (e.g. 403 email-not-verified, 404 empty pool).
+        validateStatus: (s) => s != null && s < 500,
+      ),
+    );
+    // A bare Dio with no interceptors, used only to refresh — so the refresh
+    // call itself can never recurse back into the 401 handler.
+    _refreshDio = Dio(BaseOptions(baseUrl: AppConfig.apiBaseUrl));
+
+    dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          final access = tokens.access;
+          if (access != null && access.isNotEmpty) {
+            options.headers['Authorization'] = 'Bearer $access';
+          }
+          handler.next(options);
+        },
+        onError: (error, handler) async {
+          final response = error.response;
+          final path = error.requestOptions.path;
+          final canRetry = error.requestOptions.extra['__retried'] != true;
+
+          if (response?.statusCode == 401 &&
+              canRetry &&
+              tokens.hasSession &&
+              !_isAuthEndpoint(path)) {
+            final refreshed = await _refreshOnce();
+            if (refreshed) {
+              try {
+                final opts = error.requestOptions;
+                opts.extra['__retried'] = true;
+                opts.headers['Authorization'] = 'Bearer ${tokens.access}';
+                final retry = await dio.fetch(opts);
+                return handler.resolve(retry);
+              } catch (e) {
+                if (e is DioException) return handler.next(e);
+                rethrow;
+              }
+            }
+            // Refresh failed — session is gone for good.
+            await tokens.clear();
+            onSessionExpired?.call();
+          }
+          handler.next(error);
+        },
+      ),
+    );
+  }
+
+  final TokenStore tokens;
+  late final Dio dio;
+  late final Dio _refreshDio;
+
+  /// Called when a refresh fails and the session can't be recovered; the app
+  /// wires this to route back to the login screen.
+  void Function()? onSessionExpired;
+
+  // Shared in-flight refresh so concurrent 401s coalesce into one call.
+  Future<bool>? _refreshing;
+
+  Future<bool> _refreshOnce() {
+    return _refreshing ??= _doRefresh().whenComplete(() => _refreshing = null);
+  }
+
+  Future<bool> _doRefresh() async {
+    final token = tokens.refresh;
+    if (token == null || token.isEmpty) return false;
+    try {
+      final resp = await _refreshDio.post(
+        '/auth/refresh',
+        data: {'refresh_token': token},
+        options: Options(validateStatus: (s) => s != null && s < 500),
+      );
+      if (resp.statusCode == 200 && resp.data is Map) {
+        final data = resp.data as Map;
+        await tokens.save(
+          access: data['access_token'] as String,
+          refresh: data['refresh_token'] as String,
+        );
+        return true;
+      }
+      return false;
+    } on DioException {
+      // Network blip: keep the tokens so a later request can retry.
+      return false;
+    }
+  }
+
+  static bool _isAuthEndpoint(String path) {
+    const unauthed = [
+      '/auth/login',
+      '/auth/register',
+      '/auth/google',
+      '/auth/refresh',
+      '/auth/forgot-password',
+      '/auth/reset-password',
+    ];
+    return unauthed.any(path.contains);
+  }
+}

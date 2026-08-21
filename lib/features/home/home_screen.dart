@@ -18,7 +18,7 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('LangUp'),
+        title: const Text('Profile'),
         actions: [
           IconButton(
             tooltip: 'Refresh',
@@ -68,13 +68,6 @@ class HomeScreen extends ConsumerWidget {
                 _InfoTile(
                     label: 'Target language',
                     value: languageName(user?.targetLanguage)),
-                const SizedBox(height: 24),
-                Text(
-                  'Phase 0 shell — auth + session working. '
-                  'Vocabulary, Practice, Review and Dashboard come next.',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
               ],
             ),
           ),

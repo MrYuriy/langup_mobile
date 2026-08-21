@@ -59,6 +59,25 @@ class AuthRepository {
     return User.fromJson(_asMap(resp.data));
   }
 
+  Future<User> updateProfile(
+    int userId, {
+    required String? fullName,
+    required String? nativeLanguage,
+    required String? targetLanguage,
+  }) async {
+    final resp = await _dio.patch('/users/$userId', data: {
+      'full_name': fullName,
+      'native_language': nativeLanguage,
+      'target_language': targetLanguage,
+    });
+    _ensureOk(resp, fallback: 'Could not save your profile');
+    return User.fromJson(_asMap(resp.data));
+  }
+
+  Future<void> logoutEverywhere() async {
+    await _dio.post('/auth/logout-all');
+  }
+
   /// Re-send the verification email to the signed-in user. Returns true when a
   /// message was sent, false when the address is already verified.
   Future<bool> resendVerification() async {

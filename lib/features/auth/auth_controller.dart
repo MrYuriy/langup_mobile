@@ -96,9 +96,34 @@ class AuthController extends StateNotifier<AuthState> {
 
   Future<void> forgotPassword(String email) => _repo.forgotPassword(email);
 
+  Future<void> updateProfile({
+    required String? fullName,
+    required String? nativeLanguage,
+    required String? targetLanguage,
+  }) async {
+    final id = state.user?.id;
+    if (id == null) return;
+    final user = await _repo.updateProfile(
+      id,
+      fullName: fullName,
+      nativeLanguage: nativeLanguage,
+      targetLanguage: targetLanguage,
+    );
+    state = state.withUser(user);
+  }
+
   Future<void> logout() async {
     await _repo.logout();
     await _google.signOut();
     state = const AuthState(status: AuthStatus.unauthenticated);
+  }
+
+  Future<void> logoutEverywhere() async {
+    try {
+      await _repo.logoutEverywhere();
+    } catch (_) {
+      // Fall through to a local logout regardless.
+    }
+    await logout();
   }
 }

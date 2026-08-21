@@ -4,18 +4,23 @@ Flutter-застосунок, що замінює веб-кабінет LangUp (
 Споживає той самий API під `/api`. Стратегія й контракти: див.
 `langup_backend/docs/MOBILE_STRATEGY.md`.
 
-## Статус — Фази 0–2
+## Статус — паритет з веб-кабінетом (Фази 0–6)
 
 - Dio-клієнт з **rotating-refresh single-flight** інтерсептором (`lib/core/api_client.dart`)
-- Токени в **flutter_secure_storage** (`lib/core/token_store.dart`)
-- Riverpod + go_router з редіректами за станом сесії
-- Auth: splash → login/register (+ forgot password, **Google Sign-In**) → мовний гейт
-- **Bottom-nav оболонка**: Words · Practice · Review · Dashboard · Profile
-- **Словник (Фаза 2):** список з пошуком, фільтром за мовою, нескінченним скролом,
-  pull-to-refresh; деталь слова (переклад + збережені речення з підсвіткою);
-  видалення; додавання слова вручну (аналог "+" з розширення)
-- Profile: банер підтвердження email з resend + оновлення профілю; logout
-- Practice/Review/Dashboard — заглушки (наступні фази)
+- Токени в **flutter_secure_storage**; Riverpod + go_router (session-driven redirects)
+- **Auth:** login/register, forgot password, **Google Sign-In**, мовний гейт
+- **Bottom-nav:** Words · Practice · Review · Dashboard · Profile
+- **Words:** список (пошук, фільтр мов, нескінченний скрол, pull-to-refresh),
+  деталь (переклад + речення з підсвіткою), видалення, ручне додавання
+- **Practice:** усі 5 типів вправ (FILL_IN_BLANKS, MULTIPLE_CHOICE, FLASHCARD,
+  MATCH_PAIRS з ігровою логікою раунду, TYPING); refill з поллінгом; quota/paywall
+- **Review:** черга SM-2, reveal + оцінки Again/Hard/Good/Easy
+- **Dashboard:** плитки статистики, розподіл mastery, статус плану
+- **Profile:** редагування (ім'я, мови), підписка (Upgrade/Manage через hosted
+  Stripe; на iOS сховано — правила App Store), email-verify banner, logout / logout-all
+
+Що лишається у вебі (мобільний не дублює): адмінка, Stripe-сторінки, лендинги
+verify/reset email, браузерне розширення.
 
 ## Запуск (dev)
 

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/providers.dart';
 import 'core/router.dart';
+import 'core/theme.dart';
 
 void main() {
   runApp(const ProviderScope(child: LangUpApp()));
@@ -28,19 +29,14 @@ class _LangUpAppState extends ConsumerState<LangUpApp> {
   @override
   Widget build(BuildContext context) {
     final router = ref.watch(routerProvider);
-    final scheme = ColorScheme.fromSeed(seedColor: const Color(0xFF3B5BDB));
+    final themeMode = ref.watch(themeModeProvider);
 
     return MaterialApp.router(
       title: 'LangUp',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(colorScheme: scheme, useMaterial3: true),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF3B5BDB),
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-      ),
+      theme: buildTheme(Brightness.light),
+      darkTheme: buildTheme(Brightness.dark),
+      themeMode: themeMode,
       routerConfig: router,
     );
   }

@@ -7,6 +7,7 @@ import '../../core/languages.dart';
 import '../../core/models/exercise_preferences.dart';
 import '../../core/models/subscription.dart';
 import '../../core/providers.dart';
+import '../../core/theme.dart';
 import '../dashboard/dashboard_controller.dart' show paymentsRepositoryProvider;
 import '../practice/practice_controller.dart' show exercisesRepositoryProvider;
 
@@ -148,6 +149,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
 
                 const SizedBox(height: 24),
+                const _AppearanceSetting(),
+
+                const SizedBox(height: 24),
                 const _PracticeSettings(),
 
                 const SizedBox(height: 24),
@@ -244,6 +248,43 @@ class _PlanSection extends ConsumerWidget {
           ],
         );
       },
+    );
+  }
+}
+
+/// Theme choice: follow the system, or force light / dark.
+class _AppearanceSetting extends ConsumerWidget {
+  const _AppearanceSetting();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mode = ref.watch(themeModeProvider);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Appearance', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        SegmentedButton<ThemeMode>(
+          segments: const [
+            ButtonSegment(
+                value: ThemeMode.system,
+                label: Text('System'),
+                icon: Icon(Icons.brightness_auto)),
+            ButtonSegment(
+                value: ThemeMode.light,
+                label: Text('Light'),
+                icon: Icon(Icons.light_mode)),
+            ButtonSegment(
+                value: ThemeMode.dark,
+                label: Text('Dark'),
+                icon: Icon(Icons.dark_mode)),
+          ],
+          selected: {mode},
+          showSelectedIcon: false,
+          onSelectionChanged: (s) =>
+              ref.read(themeModeProvider.notifier).setMode(s.first),
+        ),
+      ],
     );
   }
 }

@@ -7,7 +7,8 @@ import '../features/auth/language_gate_screen.dart';
 import '../features/auth/login_screen.dart';
 import '../features/auth/splash_screen.dart';
 import '../features/dashboard/dashboard_screen.dart';
-import '../features/practice/practice_screen.dart';
+import '../features/practice/practice_hub_screen.dart';
+import '../features/practice/practice_session_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/review/review_screen.dart';
 import '../features/shell/home_shell.dart';
@@ -53,6 +54,12 @@ final routerProvider = Provider<GoRouter>((ref) {
             WordDetailScreen(uuid: state.pathParameters['uuid']!),
       ),
 
+      // Full-screen practice session (pushed over the shell from the hub).
+      GoRoute(
+        path: '/practice/session',
+        builder: (_, _) => const PracticeSessionScreen(),
+      ),
+
       // Authenticated tabs.
       StatefulShellRoute.indexedStack(
         builder: (_, _, shell) => HomeShell(navigationShell: shell),
@@ -61,7 +68,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             GoRoute(path: '/words', builder: (_, _) => const VocabularyScreen()),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(path: '/practice', builder: (_, _) => const PracticeScreen()),
+            GoRoute(path: '/practice', builder: (_, _) => const PracticeHubScreen()),
           ]),
           StatefulShellBranch(routes: [
             GoRoute(path: '/review', builder: (_, _) => const ReviewScreen()),

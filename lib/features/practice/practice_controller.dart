@@ -6,13 +6,13 @@ import '../../core/providers.dart';
 import '../vocabulary/vocabulary_controller.dart';
 import 'exercises_repository.dart';
 
-enum PracticePhase { loading, exercise, result, empty, error }
+enum PracticePhase { idle, loading, exercise, result, empty, error }
 
 enum EmptyReason { notVerified, dailyLimit, noExercises }
 
 class PracticeState {
   const PracticeState({
-    this.phase = PracticePhase.loading,
+    this.phase = PracticePhase.idle,
     this.exercise,
     this.result,
     this.lastAnswer,
@@ -94,7 +94,13 @@ class PracticeController extends StateNotifier<PracticeState> {
     } catch (_) {
       // Practice can still run on the server's default language.
     }
-    await loadNext();
+    // Stay on the hub (idle) until the user picks what to practise.
+  }
+
+  /// Choose a type from the hub and begin a session (null type = mixed).
+  void startWith(String? type) {
+    state = state.copyWith(activeType: type);
+    loadNext();
   }
 
   Future<void> loadNext() async {
@@ -145,14 +151,14 @@ class PracticeController extends StateNotifier<PracticeState> {
     }
   }
 
-  void selectType(String? type) {
-    state = state.copyWith(activeType: type);
-    loadNext();
-  }
-
+  /// Hub selection — sets the language but does not load until the user starts.
   void selectLanguage(String? language) {
     state = state.copyWith(activeLanguage: language);
-    loadNext();
+  }
+
+  /// Leave the session and return to the hub.
+  void backToHub() {
+    state = state.copyWith(phase: PracticePhase.idle, result: null);
   }
 
   /// Generate more exercises on demand, polling a queued job. Returns how many

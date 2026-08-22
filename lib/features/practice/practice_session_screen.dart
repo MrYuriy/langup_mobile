@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/languages.dart';
 import '../../core/models/exercise.dart';
 import 'practice_controller.dart';
 import 'widgets/fill_in_blanks_view.dart';
@@ -10,61 +9,44 @@ import 'widgets/match_pairs_view.dart';
 import 'widgets/multiple_choice_view.dart';
 import 'widgets/typing_view.dart';
 
-class PracticeScreen extends ConsumerWidget {
-  const PracticeScreen({super.key});
+/// A focused, full-screen practice session for the type/language chosen on the
+/// hub. No pickers here — just the exercise, its result, and what to do next.
+class PracticeSessionScreen extends ConsumerWidget {
+  const PracticeSessionScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(practiceControllerProvider);
     final ctrl = ref.read(practiceControllerProvider.notifier);
+    final title = state.activeType == null
+        ? 'Mixed practice'
+        : (ExerciseTypes.labels[state.activeType] ?? 'Practice');
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Practice'),
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(state.languages.length > 1 ? 100 : 52),
-          child: Column(
-            children: [
-              _chipsRow([
-                _Chip('Any', state.activeType == null, () => ctrl.selectType(null)),
-                for (final e in ExerciseTypes.labels.entries)
-                  _Chip(e.value, state.activeType == e.key,
-                      () => ctrl.selectType(e.key)),
-              ]),
-              if (state.languages.length > 1)
-                _chipsRow([
-                  for (final l in state.languages)
-                    _Chip(languageName(l.language),
-                        state.activeLanguage == l.language,
-                        () => ctrl.selectLanguage(l.language)),
-                ]),
-            ],
+    return PopScope(
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) ctrl.backToHub();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(title),
+          leading: IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () => Navigator.of(context).maybePop(),
+          ),
+        ),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: _body(context, state, ctrl),
           ),
         ),
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: _body(context, ref, state, ctrl),
-        ),
-      ),
     );
   }
 
-  Widget _chipsRow(List<Widget> chips) {
-    return SizedBox(
-      height: 48,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        children: chips,
-      ),
-    );
-  }
-
-  Widget _body(BuildContext context, WidgetRef ref, PracticeState state,
-      PracticeController ctrl) {
+  Widget _body(BuildContext context, PracticeState state, PracticeController ctrl) {
     switch (state.phase) {
+      case PracticePhase.idle:
       case PracticePhase.loading:
         return const Center(child: CircularProgressIndicator());
       case PracticePhase.error:
@@ -79,15 +61,13 @@ class PracticeScreen extends ConsumerWidget {
       case PracticePhase.result:
         return _ResultView(state: state, ctrl: ctrl);
       case PracticePhase.exercise:
-        return _exerciseView(context, state, ctrl);
+        return _exerciseView(state, ctrl);
     }
   }
 
-  Widget _exerciseView(
-      BuildContext context, PracticeState state, PracticeController ctrl) {
+  Widget _exerciseView(PracticeState state, PracticeController ctrl) {
     final ex = state.exercise!;
     void submit(ExerciseAnswer a) => ctrl.submit(a);
-    // A key per exercise resets each view's internal state on advance.
     final key = ValueKey(ex.uuid);
     switch (ex.exerciseType) {
       case 'MULTIPLE_CHOICE':
@@ -106,21 +86,6 @@ class PracticeScreen extends ConsumerWidget {
         return FillInBlanksView(
             key: key, exercise: ex, onSubmit: submit, submitting: state.submitting);
     }
-  }
-}
-
-class _Chip extends StatelessWidget {
-  const _Chip(this.label, this.selected, this.onTap);
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: ChoiceChip(
-          label: Text(label), selected: selected, onSelected: (_) => onTap()),
-    );
   }
 }
 
@@ -165,10 +130,7 @@ class _ResultView extends StatelessWidget {
             ),
           ),
         ),
-        FilledButton(
-          onPressed: ctrl.loadNext,
-          child: const Text('Next'),
-        ),
+        FilledButton(onPressed: ctrl.loadNext, child: const Text('Next')),
       ],
     );
   }
@@ -220,7 +182,7 @@ class _EmptyView extends StatelessWidget {
         return _Centered(
           icon: Icons.auto_awesome,
           text: state.activeType != null
-              ? 'No "${ExerciseTypes.labels[state.activeType]}" exercises right now. They appear as you save new words — or pick "Any".'
+              ? 'No "${ExerciseTypes.labels[state.activeType]}" exercises right now. They appear as you save new words — or try Mixed.'
               : 'No exercises ready yet. They are generated after you save new words — this usually takes up to a minute.',
           actionLabel: state.generating ? null : 'Generate now',
           onAction: state.generating

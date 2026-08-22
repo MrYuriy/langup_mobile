@@ -32,9 +32,13 @@ class ApiClient {
         connectTimeout: const Duration(seconds: 15),
         receiveTimeout: const Duration(seconds: 30),
         headers: {'Content-Type': 'application/json'},
-        // We handle status codes ourselves; don't throw on <500 so callers can
-        // read 4xx bodies (e.g. 403 email-not-verified, 404 empty pool).
-        validateStatus: (s) => s != null && s < 500,
+        // Callers read most 4xx bodies themselves (403 email-not-verified, 404
+        // empty pool), so those must NOT throw. But 401 MUST throw — that is the
+        // only signal that routes into onError, where the token is refreshed and
+        // the request retried. Accepting 401 as a normal response (the old bug)
+        // meant refresh never ran and every call failed once the access token
+        // expired ("Invalid or expired token").
+        validateStatus: (s) => s != null && s < 500 && s != 401,
       ),
     );
     // A bare Dio with no interceptors, used only to refresh — so the refresh

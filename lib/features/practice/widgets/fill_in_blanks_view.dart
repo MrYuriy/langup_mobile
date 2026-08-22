@@ -23,6 +23,11 @@ class _FillInBlanksViewState extends State<FillInBlanksView> {
   final _chosen = <String, String>{};
   late final List<(String, String?)> _parts;
   late final List<Map<String, dynamic>> _blanks;
+  // Options shuffled ONCE per blank index. The backend does not shuffle
+  // fill-in-blanks options (unlike multiple-choice), so without this the correct
+  // answer would sit in a fixed position — the web shuffles them too. Shuffled in
+  // initState (not build) so they don't jump around on every tap.
+  final _options = <String, List<String>>{};
 
   @override
   void initState() {
@@ -32,6 +37,11 @@ class _FillInBlanksViewState extends State<FillInBlanksView> {
       for (final b in (widget.exercise.payload['blanks'] as List? ?? []))
         (b as Map).cast<String, dynamic>(),
     ];
+    for (final blank in _blanks) {
+      final index = blank['index'].toString();
+      _options[index] = [for (final o in (blank['options'] as List)) o.toString()]
+        ..shuffle();
+    }
   }
 
   @override
@@ -78,7 +88,7 @@ class _FillInBlanksViewState extends State<FillInBlanksView> {
 
   Widget _blankRow(BuildContext context, Map<String, dynamic> blank) {
     final index = blank['index'].toString();
-    final options = [for (final o in (blank['options'] as List)) o.toString()];
+    final options = _options[index]!;
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(

@@ -37,4 +37,16 @@ class User {
         nativeLanguage: json['native_language'] as String?,
         targetLanguage: json['target_language'] as String?,
       );
+
+  /// Only the fields we read back — enough to render the shell offline.
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'email': email,
+        'full_name': fullName,
+        'role': role,
+        'status': status,
+        'is_email_verified': isEmailVerified,
+        'native_language': nativeLanguage,
+        'target_language': targetLanguage,
+      };
 }

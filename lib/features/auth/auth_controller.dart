@@ -46,33 +46,52 @@ class AuthController extends StateNotifier<AuthState> {
   final TokenStore _tokens;
   final GoogleAuthService _google;
 
-  /// Called once on launch: restore tokens and validate the session.
+  /// Called once on launch: restore the session without forcing a re-login.
+  ///
+  /// A stored refresh token means the user is signed in. We try to freshen the
+  /// profile, but a network failure must NOT log them out — only a refresh the
+  /// server actually rejected does (the interceptor clears the tokens then).
   Future<void> bootstrap() async {
     await _tokens.load();
     if (!_tokens.hasSession) {
       state = const AuthState(status: AuthStatus.unauthenticated);
       return;
     }
+    final cached = _tokens.cachedUser;
     try {
-      final user = await _repo.me();
-      state = state.withUser(user);
+      await _apply(await _repo.me());
     } catch (_) {
-      await _tokens.clear();
-      state = const AuthState(status: AuthStatus.unauthenticated);
+      if (!_tokens.hasSession) {
+        // The interceptor found the session genuinely invalid and cleared it.
+        state = const AuthState(status: AuthStatus.unauthenticated);
+      } else if (cached != null) {
+        // Transient/offline: keep the session, show the cached profile.
+        state = state.withUser(User.fromJson(cached));
+      } else {
+        // Tokens are valid but we have no cached profile and can't reach the
+        // server. Don't bounce to login — enter the app; screens refresh later.
+        state = const AuthState(status: AuthStatus.authenticated);
+      }
     }
   }
 
+  /// Persist the profile alongside the tokens and update state.
+  Future<void> _apply(User user) async {
+    await _tokens.saveUser(user.toJson());
+    state = state.withUser(user);
+  }
+
   Future<void> login(String email, String password) async =>
-      state = state.withUser(await _repo.login(email, password));
+      _apply(await _repo.login(email, password));
 
   Future<void> register(String email, String password, String? name) async =>
-      state = state.withUser(await _repo.register(email, password, name));
+      _apply(await _repo.register(email, password, name));
 
   /// Interactive Google sign-in. Does nothing if the user cancels.
   Future<void> signInWithGoogle() async {
     final idToken = await _google.signIn();
     if (idToken == null) return; // canceled
-    state = state.withUser(await _repo.googleLogin(idToken));
+    await _apply(await _repo.googleLogin(idToken));
   }
 
   /// Re-send the confirmation email; returns true if a new one was sent
@@ -82,7 +101,7 @@ class AuthController extends StateNotifier<AuthState> {
   /// Re-fetch the profile (e.g. after the user confirms their email elsewhere).
   Future<void> refreshUser() async {
     try {
-      state = state.withUser(await _repo.me());
+      await _apply(await _repo.me());
     } catch (_) {
       // Leave the current state; a hard 401 already routes via onSessionExpired.
     }
@@ -91,7 +110,7 @@ class AuthController extends StateNotifier<AuthState> {
   Future<void> setNativeLanguage(String language) async {
     final id = state.user?.id;
     if (id == null) return;
-    state = state.withUser(await _repo.setNativeLanguage(id, language));
+    await _apply(await _repo.setNativeLanguage(id, language));
   }
 
   Future<void> forgotPassword(String email) => _repo.forgotPassword(email);
@@ -109,7 +128,7 @@ class AuthController extends StateNotifier<AuthState> {
       nativeLanguage: nativeLanguage,
       targetLanguage: targetLanguage,
     );
-    state = state.withUser(user);
+    await _apply(user);
   }
 
   Future<void> logout() async {

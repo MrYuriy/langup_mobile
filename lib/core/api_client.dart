@@ -3,6 +3,20 @@ import 'package:dio/dio.dart';
 import 'config.dart';
 import 'token_store.dart';
 
+/// Result of trying to refresh the access token.
+enum RefreshOutcome {
+  /// New tokens obtained and stored.
+  refreshed,
+
+  /// The server rejected the refresh token (expired/reused) — the session is
+  /// genuinely over, so log out.
+  invalid,
+
+  /// A transient failure (no network, timeout, server 5xx). The tokens are
+  /// still good; keep the session and let a later request retry.
+  networkError,
+}
+
 /// Central HTTP client.
 ///
 /// Mirrors the web cabinet's `api.js`: every request carries the Bearer access
@@ -45,8 +59,8 @@ class ApiClient {
               canRetry &&
               tokens.hasSession &&
               !_isAuthEndpoint(path)) {
-            final refreshed = await _refreshOnce();
-            if (refreshed) {
+            final outcome = await _refreshOnce();
+            if (outcome == RefreshOutcome.refreshed) {
               try {
                 final opts = error.requestOptions;
                 opts.extra['__retried'] = true;
@@ -58,9 +72,13 @@ class ApiClient {
                 rethrow;
               }
             }
-            // Refresh failed — session is gone for good.
-            await tokens.clear();
-            onSessionExpired?.call();
+            // Only log out when the server actually rejected the refresh token.
+            // A network blip keeps the session — the user stays signed in and
+            // the next request retries once connectivity is back.
+            if (outcome == RefreshOutcome.invalid) {
+              await tokens.clear();
+              onSessionExpired?.call();
+            }
           }
           handler.next(error);
         },
@@ -77,33 +95,39 @@ class ApiClient {
   void Function()? onSessionExpired;
 
   // Shared in-flight refresh so concurrent 401s coalesce into one call.
-  Future<bool>? _refreshing;
+  Future<RefreshOutcome>? _refreshing;
 
-  Future<bool> _refreshOnce() {
+  Future<RefreshOutcome> _refreshOnce() {
     return _refreshing ??= _doRefresh().whenComplete(() => _refreshing = null);
   }
 
-  Future<bool> _doRefresh() async {
+  Future<RefreshOutcome> _doRefresh() async {
     final token = tokens.refresh;
-    if (token == null || token.isEmpty) return false;
+    if (token == null || token.isEmpty) return RefreshOutcome.invalid;
     try {
       final resp = await _refreshDio.post(
         '/auth/refresh',
         data: {'refresh_token': token},
-        options: Options(validateStatus: (s) => s != null && s < 500),
+        // Accept up to 5xx so we can tell "server rejected the token" (4xx)
+        // apart from "server had a hiccup" (5xx) — the latter keeps the session.
+        options: Options(validateStatus: (s) => s != null),
       );
-      if (resp.statusCode == 200 && resp.data is Map) {
+      final code = resp.statusCode ?? 0;
+      if (code == 200 && resp.data is Map) {
         final data = resp.data as Map;
         await tokens.save(
           access: data['access_token'] as String,
           refresh: data['refresh_token'] as String,
         );
-        return true;
+        return RefreshOutcome.refreshed;
       }
-      return false;
+      // 401/403 (and other 4xx) mean the refresh token is no good — log out.
+      // 5xx is a server problem, not an invalid session — keep the tokens.
+      if (code >= 400 && code < 500) return RefreshOutcome.invalid;
+      return RefreshOutcome.networkError;
     } on DioException {
-      // Network blip: keep the tokens so a later request can retry.
-      return false;
+      // No network / timeout: keep the tokens so a later request can retry.
+      return RefreshOutcome.networkError;
     }
   }
 

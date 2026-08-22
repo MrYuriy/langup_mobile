@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../../core/api_client.dart';
 import '../../core/models/exercise.dart';
+import '../../core/models/exercise_preferences.dart';
 
 /// Outcome of asking for the next exercise.
 enum NextStatus { ok, empty, notVerified, error }
@@ -42,6 +43,20 @@ class ExercisesRepository {
     });
     _ok(resp);
     return AttemptResult.fromJson(_map(resp.data));
+  }
+
+  Future<ExercisePreferences> preferences() async {
+    final resp = await _dio.get('/exercises/preferences');
+    _ok(resp);
+    return ExercisePreferences.fromJson(_map(resp.data));
+  }
+
+  /// PUT the full preferences object (the API requires `exercise_types`), so
+  /// callers read the current prefs first, then send them back with the change.
+  Future<ExercisePreferences> setPreferences(ExercisePreferences prefs) async {
+    final resp = await _dio.put('/exercises/preferences', data: prefs.toJson());
+    _ok(resp);
+    return ExercisePreferences.fromJson(_map(resp.data));
   }
 
   Future<GenerationQuota?> quota() async {

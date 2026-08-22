@@ -4,9 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/languages.dart';
+import '../../core/models/exercise_preferences.dart';
 import '../../core/models/subscription.dart';
 import '../../core/providers.dart';
 import '../dashboard/dashboard_controller.dart' show paymentsRepositoryProvider;
+import '../practice/practice_controller.dart' show exercisesRepositoryProvider;
 
 final _subscriptionProvider =
     FutureProvider.autoDispose<Subscription?>((ref) {
@@ -146,6 +148,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
 
                 const SizedBox(height: 24),
+                const _PracticeSettings(),
+
+                const SizedBox(height: 24),
                 _PlanSection(),
 
                 const SizedBox(height: 24),
@@ -239,6 +244,83 @@ class _PlanSection extends ConsumerWidget {
           ],
         );
       },
+    );
+  }
+}
+
+/// Practice preferences. Currently just the match-pairs filler toggle — whether
+/// a matching round may be topped up with random shared-dictionary words when
+/// the user's own vocabulary can't fill the board.
+class _PracticeSettings extends ConsumerStatefulWidget {
+  const _PracticeSettings();
+
+  @override
+  ConsumerState<_PracticeSettings> createState() => _PracticeSettingsState();
+}
+
+class _PracticeSettingsState extends ConsumerState<_PracticeSettings> {
+  ExercisePreferences? _prefs;
+  bool _loading = true;
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final prefs = await ref.read(exercisesRepositoryProvider).preferences();
+      if (mounted) setState(() => _prefs = prefs);
+    } catch (_) {
+      // Leave the section hidden if preferences can't be loaded.
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _toggle(bool value) async {
+    final current = _prefs;
+    if (current == null || _saving) return;
+    setState(() {
+      _saving = true;
+      _prefs = current.copyWith(matchPairsFillers: value); // optimistic
+    });
+    try {
+      final saved = await ref
+          .read(exercisesRepositoryProvider)
+          .setPreferences(current.copyWith(matchPairsFillers: value));
+      if (mounted) setState(() => _prefs = saved);
+    } catch (_) {
+      if (mounted) {
+        setState(() => _prefs = current); // roll back
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not save the setting.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading || _prefs == null) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Practice', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 4),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Fill matching games with dictionary words'),
+          subtitle: const Text(
+              'When you don’t have enough of your own words, top up “Pairs” rounds with words from the shared dictionary.'),
+          value: _prefs!.matchPairsFillers,
+          onChanged: _saving ? null : _toggle,
+        ),
+      ],
     );
   }
 }

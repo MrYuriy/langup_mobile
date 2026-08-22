@@ -6,7 +6,9 @@ plugins {
 
 android {
     namespace = "com.langup.langup_mobile"
-    compileSdk = flutter.compileSdkVersion
+    // Pinned to an installed platform (android-36). Flutter's default and some
+    // plugins otherwise pull android-37, which isn't installed and fails the build.
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

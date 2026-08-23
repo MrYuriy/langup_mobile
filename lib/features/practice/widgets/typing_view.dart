@@ -49,6 +49,18 @@ class _TypingViewState extends State<TypingView> {
   @override
   Widget build(BuildContext context) {
     final style = Theme.of(context).textTheme.titleLarge;
+    // The blank is a monospace field sized to exactly the word's length — the
+    // width itself is a length hint (as on the web). Text is left-aligned so the
+    // caret starts at the beginning, not floating in the middle.
+    final mono =
+        style?.copyWith(fontFamily: 'monospace', fontFeatures: const []) ?? style;
+    final n = (_length != null && _length! > 0) ? _length! : 8;
+    final measure = TextPainter(
+      text: TextSpan(text: '0' * n, style: mono),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    final fieldWidth = measure.width + 10; // room for the caret
+
     return ExerciseScaffold(
       exercise: widget.exercise,
       submitting: widget.submitting,
@@ -65,14 +77,14 @@ class _TypingViewState extends State<TypingView> {
                   Text(literal, style: style)
                 else
                   SizedBox(
-                    width: ((_length ?? 8) * 14.0).clamp(60, 220),
+                    width: fieldWidth,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 2),
                       child: TextField(
                         controller: _ctrl,
                         autofocus: true,
                         maxLength: _length,
-                        textAlign: TextAlign.center,
+                        textAlign: TextAlign.left,
                         autocorrect: false,
                         enableSuggestions: false,
                         textInputAction: TextInputAction.done,
@@ -80,8 +92,9 @@ class _TypingViewState extends State<TypingView> {
                         decoration: const InputDecoration(
                           counterText: '',
                           isDense: true,
+                          contentPadding: EdgeInsets.symmetric(vertical: 4),
                         ),
-                        style: style,
+                        style: mono,
                       ),
                     ),
                   ),

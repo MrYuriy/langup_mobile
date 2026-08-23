@@ -106,6 +106,11 @@ class _FlashcardViewState extends State<FlashcardView> {
   Widget _highlighted(BuildContext context, String sentence, String term) {
     final base = Theme.of(context).textTheme.titleMedium;
     if (term.isEmpty) return Text(sentence, style: base);
+    // Bold + accent colour so the word under review is unmistakable.
+    final hl = (base ?? const TextStyle()).copyWith(
+      fontWeight: FontWeight.w800,
+      color: Theme.of(context).colorScheme.primary,
+    );
     final spans = <TextSpan>[];
     final lower = sentence.toLowerCase();
     final needle = term.toLowerCase();
@@ -113,10 +118,7 @@ class _FlashcardViewState extends State<FlashcardView> {
     var at = lower.indexOf(needle);
     while (at != -1) {
       if (at > from) spans.add(TextSpan(text: sentence.substring(from, at)));
-      spans.add(TextSpan(
-        text: sentence.substring(at, at + term.length),
-        style: const TextStyle(fontWeight: FontWeight.bold),
-      ));
+      spans.add(TextSpan(text: sentence.substring(at, at + term.length), style: hl));
       from = at + term.length;
       at = lower.indexOf(needle, from);
     }

@@ -36,7 +36,7 @@ class _LangUpAppState extends ConsumerState<LangUpApp> {
   Widget build(BuildContext context) {
     final router = ref.watch(routerProvider);
     final themeMode = ref.watch(themeModeProvider);
-    ref.watch(localeProvider); // rebuild the whole tree on a language change
+    final locale = ref.watch(localeProvider); // rebuild on a language change
 
     // Default the UI language to the account's native language on first sign-in
     // (only until the user picks one explicitly).
@@ -54,6 +54,13 @@ class _LangUpAppState extends ConsumerState<LangUpApp> {
       darkTheme: buildTheme(Brightness.dark),
       themeMode: themeMode,
       routerConfig: router,
+      // go_router caches route pages, so a MaterialApp rebuild alone leaves most
+      // screens on the old language. Keying the routed subtree by the current
+      // language forces every visible screen to rebuild when it changes.
+      builder: (context, child) => KeyedSubtree(
+        key: ValueKey(locale),
+        child: child ?? const SizedBox.shrink(),
+      ),
     );
   }
 }

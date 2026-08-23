@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/i18n.dart';
 import '../../../core/models/exercise.dart';
 import 'exercise_scaffold.dart';
 
@@ -97,7 +98,7 @@ class _FillInBlanksViewState extends State<FillInBlanksView> {
           if (_blanks.length > 1)
             Padding(
               padding: const EdgeInsets.only(bottom: 6),
-              child: Text('Blank $index',
+              child: Text(t('practice.blank', {'n': index}),
                   style: Theme.of(context).textTheme.labelMedium),
             ),
           Wrap(

@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import 'core/i18n.dart';
 import 'core/providers.dart';
 import 'core/router.dart';
 import 'core/theme.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Load the interface language before the first frame so t() is ready.
+  final saved = await const FlutterSecureStorage().read(key: 'langup_ui_lang');
+  await I18n.instance.load(I18n.resolveInitial(saved));
   runApp(const ProviderScope(child: LangUpApp()));
 }
 
@@ -30,6 +36,16 @@ class _LangUpAppState extends ConsumerState<LangUpApp> {
   Widget build(BuildContext context) {
     final router = ref.watch(routerProvider);
     final themeMode = ref.watch(themeModeProvider);
+    ref.watch(localeProvider); // rebuild the whole tree on a language change
+
+    // Default the UI language to the account's native language on first sign-in
+    // (only until the user picks one explicitly).
+    ref.listen(authControllerProvider.select((s) => s.user?.nativeLanguage),
+        (_, native) {
+      if (native != null) {
+        ref.read(localeProvider.notifier).syncToNative(native);
+      }
+    });
 
     return MaterialApp.router(
       title: 'LangUp',

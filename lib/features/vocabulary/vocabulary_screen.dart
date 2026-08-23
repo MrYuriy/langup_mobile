@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/i18n.dart';
 import '../../core/languages.dart';
 import '../../core/mastery.dart';
 import '../../core/models/user_word.dart';
@@ -67,7 +68,7 @@ class _VocabularyScreenState extends ConsumerState<VocabularyScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My words'),
+        title: Text(t('words.title')),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(112),
           child: Column(
@@ -78,7 +79,7 @@ class _VocabularyScreenState extends ConsumerState<VocabularyScreen> {
                   controller: _searchCtrl,
                   onChanged: _onSearchChanged,
                   decoration: InputDecoration(
-                    hintText: 'Search words…',
+                    hintText: t('words.search_ph'),
                     isDense: true,
                     prefixIcon: const Icon(Icons.search),
                     suffixIcon: state.query.isEmpty
@@ -103,7 +104,7 @@ class _VocabularyScreenState extends ConsumerState<VocabularyScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     children: [
                       _LangChip(
-                        label: 'All',
+                        label: t('common.all'),
                         selected: state.selectedLanguage == null,
                         onTap: () => ctrl.selectLanguage(null),
                       ),
@@ -123,7 +124,7 @@ class _VocabularyScreenState extends ConsumerState<VocabularyScreen> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _openAdd,
         icon: const Icon(Icons.add),
-        label: const Text('Add word'),
+        label: Text(t('words.add')),
       ),
       body: RefreshIndicator(
         onRefresh: ctrl.refresh,
@@ -143,8 +144,8 @@ class _VocabularyScreenState extends ConsumerState<VocabularyScreen> {
       return _Message(
         icon: Icons.menu_book_outlined,
         text: state.query.isNotEmpty
-            ? 'No words match "${state.query}".'
-            : 'No words yet. Tap “Add word”, or save words from the browser extension.',
+            ? t('words.no_match', {'query': state.query})
+            : t('words.empty_add'),
       );
     }
 
@@ -173,16 +174,15 @@ class _VocabularyScreenState extends ConsumerState<VocabularyScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text('Remove “${word.lemma}”?'),
-        content: const Text(
-            'It leaves your dictionary. The shared entry stays for other users.'),
+        title: Text(t('words.remove_title', {'word': word.lemma})),
+        content: Text(t('words.remove_body')),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel')),
+              child: Text(t('common.cancel'))),
           FilledButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Remove')),
+              child: Text(t('common.remove'))),
         ],
       ),
     );
@@ -190,7 +190,7 @@ class _VocabularyScreenState extends ConsumerState<VocabularyScreen> {
     final removed = await ctrl.remove(word.uuid);
     if (!removed && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not remove the word.')),
+        SnackBar(content: Text(t('words.could_not_remove'))),
       );
     }
   }
@@ -215,7 +215,7 @@ class _WordTile extends StatelessWidget {
       title: Text(word.lemma, style: const TextStyle(fontWeight: FontWeight.w600)),
       subtitle: Text([
         if (word.partOfSpeech != null) word.partOfSpeech!.toLowerCase(),
-        Mastery.label(word.masteryLevel),
+        masteryLabel(word.masteryLevel),
       ].join(' · ')),
       trailing: IconButton(
         icon: const Icon(Icons.delete_outline),

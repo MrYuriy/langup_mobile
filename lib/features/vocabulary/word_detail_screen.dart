@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/i18n.dart';
 import '../../core/languages.dart';
 import '../../core/mastery.dart';
 import '../../core/models/user_word.dart';
@@ -20,13 +21,13 @@ class WordDetailScreen extends ConsumerWidget {
     final detail = ref.watch(_wordDetailProvider(uuid));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Word')),
+      appBar: AppBar(title: Text(t('words.field_word'))),
       body: detail.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => const Center(
+        error: (_, _) => Center(
           child: Padding(
-            padding: EdgeInsets.all(24),
-            child: Text('Could not load this word.'),
+            padding: const EdgeInsets.all(24),
+            child: Text(t('words.detail_fail')),
           ),
         ),
         data: (w) => _Detail(word: w),
@@ -55,27 +56,27 @@ class _Detail extends StatelessWidget {
             _Chip(languageName(word.language)),
             if (word.partOfSpeech != null)
               _Chip(word.partOfSpeech!.toLowerCase()),
-            _Chip(Mastery.label(word.masteryLevel),
+            _Chip(masteryLabel(word.masteryLevel),
                 color: Mastery.color(word.masteryLevel)),
           ],
         ),
         const SizedBox(height: 24),
         if (word.translation != null && word.translation!.isNotEmpty) ...[
-          Text('Translation', style: text.labelLarge),
+          Text(t('words.translation'), style: text.labelLarge),
           const SizedBox(height: 4),
           Text(word.translation!, style: text.titleMedium),
           const SizedBox(height: 24),
         ] else ...[
-          Text('Translation is being generated…',
+          Text(t('words.translating'),
               style: text.bodyMedium
                   ?.copyWith(color: Theme.of(context).disabledColor)),
           const SizedBox(height: 24),
         ],
-        Text('Sentences you saved (${word.contexts.length})',
+        Text(t('words.sentences_count', {'count': word.contexts.length}),
             style: text.labelLarge),
         const SizedBox(height: 8),
         if (word.contexts.isEmpty)
-          Text('No saved sentences for this word.',
+          Text(t('words.no_sentences'),
               style: text.bodyMedium
                   ?.copyWith(color: Theme.of(context).disabledColor))
         else

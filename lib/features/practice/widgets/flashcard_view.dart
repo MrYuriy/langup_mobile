@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/i18n.dart';
 import '../../../core/models/exercise.dart';
 
 class FlashcardView extends StatefulWidget {
@@ -34,7 +35,7 @@ class _FlashcardViewState extends State<FlashcardView> {
       children: [
         Padding(
           padding: const EdgeInsets.only(bottom: 16),
-          child: Text(ExerciseTypes.prompt(widget.exercise.exerciseType),
+          child: Text(t('prompt.${widget.exercise.exerciseType.toLowerCase()}'),
               style: text.titleMedium),
         ),
         Expanded(
@@ -54,7 +55,7 @@ class _FlashcardViewState extends State<FlashcardView> {
         if (!_revealed)
           FilledButton(
             onPressed: () => setState(() => _revealed = true),
-            child: const Text('Show translation'),
+            child: Text(t('practice.show_translation')),
           )
         else ...[
           Padding(
@@ -72,7 +73,7 @@ class _FlashcardViewState extends State<FlashcardView> {
                       ? null
                       : () => widget.onSubmit(
                           const ExerciseAnswer({'1': 'dont_know'})),
-                  child: const Text("Didn't know"),
+                  child: Text(t('practice.didnt_know')),
                 ),
               ),
               const SizedBox(width: 12),
@@ -82,7 +83,7 @@ class _FlashcardViewState extends State<FlashcardView> {
                       ? null
                       : () =>
                           widget.onSubmit(const ExerciseAnswer({'1': 'know'})),
-                  child: const Text('Knew it'),
+                  child: Text(t('practice.knew_it')),
                 ),
               ),
             ],

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/i18n.dart';
+
 /// Bottom-navigation shell hosting the authenticated tabs. The branches keep
 /// their own navigation state (go_router's indexed stack).
 class HomeShell extends StatelessWidget {
@@ -18,27 +20,27 @@ class HomeShell extends StatelessWidget {
           i,
           initialLocation: i == navigationShell.currentIndex,
         ),
-        destinations: const [
+        destinations: [
           NavigationDestination(
-              icon: Icon(Icons.menu_book_outlined),
-              selectedIcon: Icon(Icons.menu_book),
-              label: 'Words'),
+              icon: const Icon(Icons.menu_book_outlined),
+              selectedIcon: const Icon(Icons.menu_book),
+              label: t('nav.words')),
           NavigationDestination(
-              icon: Icon(Icons.fitness_center_outlined),
-              selectedIcon: Icon(Icons.fitness_center),
-              label: 'Practice'),
+              icon: const Icon(Icons.fitness_center_outlined),
+              selectedIcon: const Icon(Icons.fitness_center),
+              label: t('nav.practice')),
           NavigationDestination(
-              icon: Icon(Icons.refresh_outlined),
-              selectedIcon: Icon(Icons.refresh),
-              label: 'Review'),
+              icon: const Icon(Icons.refresh_outlined),
+              selectedIcon: const Icon(Icons.refresh),
+              label: t('nav.review')),
           NavigationDestination(
-              icon: Icon(Icons.insights_outlined),
-              selectedIcon: Icon(Icons.insights),
-              label: 'Dashboard'),
+              icon: const Icon(Icons.insights_outlined),
+              selectedIcon: const Icon(Icons.insights),
+              label: t('nav.dashboard')),
           NavigationDestination(
-              icon: Icon(Icons.person_outline),
-              selectedIcon: Icon(Icons.person),
-              label: 'Profile'),
+              icon: const Icon(Icons.person_outline),
+              selectedIcon: const Icon(Icons.person),
+              label: t('nav.profile')),
         ],
       ),
     );

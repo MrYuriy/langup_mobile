@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/i18n.dart';
 import '../../core/languages.dart';
-import '../../core/models/exercise.dart';
 import 'practice_controller.dart';
 
 /// Practice hub: pick a language and an exercise type, then start a focused
@@ -11,18 +11,22 @@ import 'practice_controller.dart';
 class PracticeHubScreen extends ConsumerWidget {
   const PracticeHubScreen({super.key});
 
-  // Type key (null = mixed) -> icon + one-line description.
-  static const _meta = <String?, (IconData, String)>{
-    null: (Icons.shuffle, 'A bit of everything'),
-    'FILL_IN_BLANKS': (Icons.short_text, 'Fill the gap in a sentence'),
-    'MULTIPLE_CHOICE': (Icons.checklist, 'Pick the correct meaning'),
-    'FLASHCARD': (Icons.style, 'Recall, then reveal'),
-    'MATCH_PAIRS': (Icons.grid_view, 'Match words to translations'),
-    'TYPING': (Icons.keyboard, 'Type the missing word'),
+  // Type key (null = mixed) -> icon. Labels and descriptions are localised.
+  static const _icons = <String?, IconData>{
+    null: Icons.shuffle,
+    'FILL_IN_BLANKS': Icons.short_text,
+    'MULTIPLE_CHOICE': Icons.checklist,
+    'FLASHCARD': Icons.style,
+    'MATCH_PAIRS': Icons.grid_view,
+    'TYPING': Icons.keyboard,
   };
 
   static String _label(String? type) =>
-      type == null ? 'Mixed' : (ExerciseTypes.labels[type] ?? type);
+      type == null ? t('practice.mixed') : t('type.${type.toLowerCase()}');
+
+  static String _desc(String? type) => type == null
+      ? t('practice.mixed_desc')
+      : t('practice.desc_${type.toLowerCase()}');
 
   void _start(BuildContext context, WidgetRef ref, String? type) {
     ref.read(practiceControllerProvider.notifier).startWith(type);
@@ -35,12 +39,13 @@ class PracticeHubScreen extends ConsumerWidget {
     final ctrl = ref.read(practiceControllerProvider.notifier);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Practice')),
+      appBar: AppBar(title: Text(t('nav.practice'))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           if (state.languages.length > 1) ...[
-            Text('Language', style: Theme.of(context).textTheme.labelLarge),
+            Text(t('practice.language'),
+                style: Theme.of(context).textTheme.labelLarge),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -55,14 +60,14 @@ class PracticeHubScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 24),
           ],
-          Text('Choose an exercise',
+          Text(t('practice.choose'),
               style: Theme.of(context).textTheme.labelLarge),
           const SizedBox(height: 8),
-          for (final entry in _meta.entries)
+          for (final entry in _icons.entries)
             _TypeCard(
-              icon: entry.value.$1,
+              icon: entry.value,
               title: _label(entry.key),
-              subtitle: entry.value.$2,
+              subtitle: _desc(entry.key),
               onTap: () => _start(context, ref, entry.key),
             ),
         ],

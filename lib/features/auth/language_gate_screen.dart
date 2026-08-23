@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/i18n.dart';
 import '../../core/languages.dart';
 import '../../core/providers.dart';
 
@@ -27,7 +28,7 @@ class _LanguageGateScreenState extends ConsumerState<LanguageGateScreen> {
     try {
       await ref.read(authControllerProvider.notifier).setNativeLanguage(_selected!);
     } catch (_) {
-      setState(() => _error = 'Could not save the language. Try again.');
+      setState(() => _error = t('toast.lang_save_fail'));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -36,7 +37,7 @@ class _LanguageGateScreenState extends ConsumerState<LanguageGateScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Your language')),
+      appBar: AppBar(title: Text(t('native.title'))),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -45,17 +46,16 @@ class _LanguageGateScreenState extends ConsumerState<LanguageGateScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text('Which language do you speak?',
+                Text(t('native.which'),
                     style: Theme.of(context).textTheme.titleLarge),
                 const SizedBox(height: 8),
-                const Text(
-                    'We translate words and build your exercises into this language.'),
+                Text(t('native.subtitle')),
                 const SizedBox(height: 24),
                 DropdownButtonFormField<String>(
                   initialValue: _selected,
-                  decoration: const InputDecoration(
-                    labelText: 'Native language',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: t('settings.i_speak'),
+                    border: const OutlineInputBorder(),
                   ),
                   items: [
                     for (final l in kLanguages)
@@ -77,7 +77,7 @@ class _LanguageGateScreenState extends ConsumerState<LanguageGateScreen> {
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2))
-                      : const Text('Continue'),
+                      : Text(t('common.continue')),
                 ),
               ],
             ),

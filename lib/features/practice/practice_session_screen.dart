@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/i18n.dart';
 import '../../core/models/exercise.dart';
 import 'practice_controller.dart';
 import 'widgets/fill_in_blanks_view.dart';
@@ -19,8 +20,8 @@ class PracticeSessionScreen extends ConsumerWidget {
     final state = ref.watch(practiceControllerProvider);
     final ctrl = ref.read(practiceControllerProvider.notifier);
     final title = state.activeType == null
-        ? 'Mixed practice'
-        : (ExerciseTypes.labels[state.activeType] ?? 'Practice');
+        ? t('practice.mixed_title')
+        : t('type.${state.activeType!.toLowerCase()}');
 
     return PopScope(
       onPopInvokedWithResult: (didPop, _) {
@@ -52,8 +53,8 @@ class PracticeSessionScreen extends ConsumerWidget {
       case PracticePhase.error:
         return _Centered(
           icon: Icons.error_outline,
-          text: 'Could not load the exercise.',
-          actionLabel: 'Retry',
+          text: t('practice.load_fail2'),
+          actionLabel: t('common.retry'),
           onAction: ctrl.loadNext,
         );
       case PracticePhase.empty:
@@ -117,20 +118,22 @@ class _ResultView extends StatelessWidget {
                     style: Theme.of(context).textTheme.titleLarge),
                 if (result.masteryLevel != null) ...[
                   const SizedBox(height: 8),
-                  Text('Mastery: ${result.masteryLevel!.toLowerCase()}',
+                  Text(
+                      t('practice.mastery',
+                          {'level': masteryLabel(result.masteryLevel!)}),
                       style: Theme.of(context).textTheme.bodyMedium),
                 ],
                 if (state.generating) ...[
                   const SizedBox(height: 24),
                   const CircularProgressIndicator(),
                   const SizedBox(height: 8),
-                  Text(state.generateStatus ?? 'Generating…'),
+                  Text(state.generateStatus ?? t('practice.generating2')),
                 ],
               ],
             ),
           ),
         ),
-        FilledButton(onPressed: ctrl.loadNext, child: const Text('Next')),
+        FilledButton(onPressed: ctrl.loadNext, child: Text(t('common.next'))),
       ],
     );
   }
@@ -138,21 +141,23 @@ class _ResultView extends StatelessWidget {
   String _message(Exercise ex, AttemptResult result) {
     switch (ex.exerciseType) {
       case 'MATCH_PAIRS':
-        final total = result.correctAnswers.length;
-        final solved = state.lastAnswer?.answers.length ?? 0;
-        if (result.isCorrect) return 'Round complete — $solved of $total pairs!';
+        final p = {
+          'done': state.lastAnswer?.answers.length ?? 0,
+          'total': result.correctAnswers.length,
+        };
+        if (result.isCorrect) return t('result2.round_complete', p);
         if (state.lastAnswer?.timedOut ?? false) {
-          return "Time's up: $solved of $total pairs.";
+          return t('result2.round_timeout', p);
         }
-        return 'Round over: $solved of $total pairs.';
+        return t('result2.round_over', p);
       case 'FLASHCARD':
         return result.isCorrect
-            ? "Great, you're learning this word!"
-            : "No worries — we'll review it later.";
+            ? t('result2.flashcard_ok')
+            : t('result2.flashcard_no');
       default:
-        if (result.isCorrect) return 'Correct!';
+        if (result.isCorrect) return t('result2.correct');
         final answers = result.correctAnswers.values.join(', ');
-        return 'Incorrect. Correct answer: $answers';
+        return t('result2.incorrect', {'answer': answers});
     }
   }
 }
@@ -166,32 +171,31 @@ class _EmptyView extends StatelessWidget {
   Widget build(BuildContext context) {
     switch (state.emptyReason) {
       case EmptyReason.notVerified:
-        return const _Centered(
+        return _Centered(
           icon: Icons.mark_email_unread_outlined,
-          text:
-              'Confirm your email to start practising. Check your inbox, or resend the link from your profile.',
+          text: t('practice.confirm_email'),
         );
       case EmptyReason.dailyLimit:
-        return const _Centered(
+        return _Centered(
           icon: Icons.lock_clock,
-          text:
-              "You've reached today's free limit of AI-generated exercises. Upgrade to Premium for unlimited practice, or come back tomorrow.",
+          text: t('practice.limit_reached'),
         );
       case EmptyReason.noExercises:
       case null:
         return _Centered(
           icon: Icons.auto_awesome,
           text: state.activeType != null
-              ? 'No "${ExerciseTypes.labels[state.activeType]}" exercises right now. They appear as you save new words — or try Mixed.'
-              : 'No exercises ready yet. They are generated after you save new words — this usually takes up to a minute.',
-          actionLabel: state.generating ? null : 'Generate now',
+              ? t('practice.empty_type2',
+                  {'type': t('type.${state.activeType!.toLowerCase()}')})
+              : t('practice.empty2'),
+          actionLabel: state.generating ? null : t('practice.generate_now'),
           onAction: state.generating
               ? null
               : () async {
                   final created = await ctrl.generateMore();
                   if (created == 0 && context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        content: Text('No new exercises — save a few more words.')));
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(t('practice.generate_none'))));
                   }
                 },
           busy: state.generating,

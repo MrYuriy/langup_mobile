@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/i18n.dart';
 import '../../core/providers.dart';
 import 'auth_repository.dart';
 
@@ -46,7 +47,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     } on AuthException catch (e) {
       setState(() => _error = e.message);
     } catch (_) {
-      setState(() => _error = 'Network error — check your connection.');
+      setState(() => _error = t('toast.network_error'));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -63,7 +64,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     } on AuthException catch (e) {
       setState(() => _error = e.message);
     } catch (_) {
-      setState(() => _error = 'Google Sign-In failed. Try again.');
+      setState(() => _error = t('toast.signin_fail'));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -72,15 +73,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _forgot() async {
     final email = _email.text.trim();
     if (email.isEmpty) {
-      setState(() => _error = 'Enter your email above first.');
+      setState(() => _error = t('toast.enter_email_first'));
       return;
     }
     await ref.read(authControllerProvider.notifier).forgotPassword(email);
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("If that email is registered, we've sent a reset link."),
-      ),
+      SnackBar(content: Text(t('toast.reset_sent'))),
     );
   }
 
@@ -102,7 +101,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.headlineMedium),
                     const SizedBox(height: 4),
-                    Text(_registering ? 'Create your account' : 'Welcome back',
+                    Text(
+                        _registering
+                            ? t('auth.create_your_account')
+                            : t('home.welcome'),
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodyMedium),
                     const SizedBox(height: 24),
@@ -112,9 +114,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         child: TextFormField(
                           controller: _name,
                           textInputAction: TextInputAction.next,
-                          decoration: const InputDecoration(
-                            labelText: 'Name (optional)',
-                            border: OutlineInputBorder(),
+                          decoration: InputDecoration(
+                            labelText: t('auth.name_optional'),
+                            border: const OutlineInputBorder(),
                           ),
                         ),
                       ),
@@ -123,12 +125,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       keyboardType: TextInputType.emailAddress,
                       autocorrect: false,
                       textInputAction: TextInputAction.next,
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: t('auth.email'),
+                        border: const OutlineInputBorder(),
                       ),
                       validator: (v) =>
-                          (v == null || !v.contains('@')) ? 'Enter a valid email' : null,
+                          (v == null || !v.contains('@')) ? t('auth.invalid_email') : null,
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
@@ -136,20 +138,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       obscureText: true,
                       textInputAction: TextInputAction.done,
                       onFieldSubmitted: (_) => _submit(),
-                      decoration: const InputDecoration(
-                        labelText: 'Password',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: t('auth.password'),
+                        border: const OutlineInputBorder(),
                       ),
-                      validator: (v) => (v == null || v.length < 8)
-                          ? 'At least 8 characters'
-                          : null,
+                      validator: (v) =>
+                          (v == null || v.length < 8) ? t('auth.min_password') : null,
                     ),
                     if (!_registering)
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
                           onPressed: _busy ? null : _forgot,
-                          child: const Text('Forgot password?'),
+                          child: Text(t('auth.forgot')),
                         ),
                       ),
                     if (_error != null)
@@ -166,7 +167,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               height: 20,
                               width: 20,
                               child: CircularProgressIndicator(strokeWidth: 2))
-                          : Text(_registering ? 'Sign up' : 'Sign in'),
+                          : Text(_registering ? t('auth.signup') : t('auth.signin')),
                     ),
                     TextButton(
                       onPressed: _busy
@@ -176,8 +177,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 _error = null;
                               }),
                       child: Text(_registering
-                          ? 'I already have an account'
-                          : 'Create account'),
+                          ? t('auth.have_account')
+                          : t('auth.create_account')),
                     ),
                     const Divider(height: 32),
                     // Requires an Android OAuth client (package name + signing

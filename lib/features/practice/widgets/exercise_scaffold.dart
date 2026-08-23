@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/i18n.dart';
 import '../../../core/models/exercise.dart';
 
 /// Shared chrome for an exercise: the instruction prompt at the top and an
@@ -12,7 +13,7 @@ class ExerciseScaffold extends StatelessWidget {
     this.onSubmit,
     this.submitEnabled = true,
     this.submitting = false,
-    this.submitLabel = 'Check',
+    this.submitLabel,
   });
 
   final Exercise exercise;
@@ -20,7 +21,7 @@ class ExerciseScaffold extends StatelessWidget {
   final VoidCallback? onSubmit;
   final bool submitEnabled;
   final bool submitting;
-  final String submitLabel;
+  final String? submitLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +31,7 @@ class ExerciseScaffold extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(bottom: 16),
           child: Text(
-            ExerciseTypes.prompt(exercise.exerciseType),
+            t('prompt.${exercise.exerciseType.toLowerCase()}'),
             style: Theme.of(context).textTheme.titleMedium,
           ),
         ),
@@ -45,7 +46,7 @@ class ExerciseScaffold extends StatelessWidget {
                       height: 20,
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2))
-                  : Text(submitLabel),
+                  : Text(submitLabel ?? t('common.check')),
             ),
           ),
       ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/i18n.dart';
 import '../../core/languages.dart';
 import '../../core/providers.dart';
 import 'vocabulary_controller.dart';
@@ -42,7 +43,7 @@ class _AddWordSheetState extends ConsumerState<AddWordSheet> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate() || _language == null) {
-      if (_language == null) setState(() => _error = 'Pick a language.');
+      if (_language == null) setState(() => _error = t('words.pick_language'));
       return;
     }
     setState(() {
@@ -59,7 +60,7 @@ class _AddWordSheetState extends ConsumerState<AddWordSheet> {
     } on VocabularyException catch (e) {
       setState(() => _error = e.message);
     } catch (_) {
-      setState(() => _error = 'Could not add the word. Try again.');
+      setState(() => _error = t('words.could_not_add'));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -76,25 +77,26 @@ class _AddWordSheetState extends ConsumerState<AddWordSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Add a word', style: Theme.of(context).textTheme.titleLarge),
+            Text(t('words.add_title'),
+                style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 16),
             TextFormField(
               controller: _word,
               autofocus: true,
               textCapitalization: TextCapitalization.none,
-              decoration: const InputDecoration(
-                labelText: 'Word',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: t('words.field_word'),
+                border: const OutlineInputBorder(),
               ),
               validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Enter a word' : null,
+                  (v == null || v.trim().isEmpty) ? t('words.enter_word') : null,
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               initialValue: _language,
-              decoration: const InputDecoration(
-                labelText: 'Language',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: t('words.field_language'),
+                border: const OutlineInputBorder(),
               ),
               items: [
                 for (final l in kLanguages)
@@ -107,10 +109,10 @@ class _AddWordSheetState extends ConsumerState<AddWordSheet> {
               controller: _sentence,
               minLines: 2,
               maxLines: 4,
-              decoration: const InputDecoration(
-                labelText: 'Sentence (optional)',
-                helperText: 'Context helps generate better exercises.',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: t('words.sentence_optional'),
+                helperText: t('words.sentence_help'),
+                border: const OutlineInputBorder(),
               ),
             ),
             if (_error != null)
@@ -127,7 +129,7 @@ class _AddWordSheetState extends ConsumerState<AddWordSheet> {
                       height: 20,
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Text('Save word'),
+                  : Text(t('words.save_word')),
             ),
           ],
         ),

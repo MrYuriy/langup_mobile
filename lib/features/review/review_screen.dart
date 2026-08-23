@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/i18n.dart';
 import '../../core/languages.dart';
 import '../../core/models/due_word.dart';
 import 'review_controller.dart';
@@ -14,7 +15,7 @@ class ReviewScreen extends ConsumerWidget {
     final ctrl = ref.read(reviewControllerProvider.notifier);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Review')),
+      appBar: AppBar(title: Text(t('nav.review'))),
       body: SafeArea(child: _body(context, state, ctrl)),
     );
   }
@@ -26,17 +27,17 @@ class ReviewScreen extends ConsumerWidget {
       case ReviewPhase.error:
         return _Message(
           icon: Icons.error_outline,
-          text: 'Could not load the review queue.',
-          actionLabel: 'Retry',
+          text: t('review.load_fail'),
+          actionLabel: t('common.retry'),
           onAction: ctrl.loadQueue,
         );
       case ReviewPhase.done:
         return _Message(
           icon: Icons.task_alt,
           text: state.reviewed > 0
-              ? 'You reviewed ${state.reviewed} word${state.reviewed == 1 ? '' : 's'}. Nothing else is due right now.'
-              : 'Nothing is due right now. Save more words or come back later.',
-          actionLabel: 'Check again',
+              ? t('review.done_count', {'count': state.reviewed})
+              : t('review.done_default'),
+          actionLabel: t('review.check_again'),
           onAction: ctrl.restart,
         );
       case ReviewPhase.card:
@@ -102,9 +103,7 @@ class _CardState extends State<_Card> {
                   const SizedBox(height: 20),
                   if (_revealed)
                     Text(
-                      hasTranslation
-                          ? w.translation!
-                          : 'No translation cached yet — grade from memory.',
+                      hasTranslation ? w.translation! : t('review.no_translation'),
                       textAlign: TextAlign.center,
                       style: hasTranslation
                           ? text.titleLarge
@@ -119,15 +118,15 @@ class _CardState extends State<_Card> {
           if (!_revealed)
             FilledButton(
               onPressed: () => setState(() => _revealed = true),
-              child: const Text('Show translation'),
+              child: Text(t('review.show_translation')),
             )
           else
             Row(
               children: [
-                _grade(context, 'Again', 1, const Color(0xFFE03131)),
-                _grade(context, 'Hard', 3, const Color(0xFFF08C00)),
-                _grade(context, 'Good', 4, const Color(0xFF1971C2)),
-                _grade(context, 'Easy', 5, const Color(0xFF2F9E44)),
+                _grade(context, t('review.grade_again'), 1, const Color(0xFFE03131)),
+                _grade(context, t('grade.hard'), 3, const Color(0xFFF08C00)),
+                _grade(context, t('grade.good'), 4, const Color(0xFF1971C2)),
+                _grade(context, t('grade.easy'), 5, const Color(0xFF2F9E44)),
               ],
             ),
         ],

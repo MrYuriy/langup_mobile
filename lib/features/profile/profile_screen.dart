@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/i18n.dart';
 import '../../core/languages.dart';
 import '../../core/models/exercise_preferences.dart';
 import '../../core/models/subscription.dart';
@@ -57,9 +58,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             nativeLanguage: _native,
             targetLanguage: _target,
           );
-      _snack('Saved');
+      _snack(t('toast.saved'));
     } catch (_) {
-      _snack('Could not save');
+      _snack(t('toast.save_fail'));
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -78,10 +79,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: Text(t('nav.profile')),
         actions: [
           IconButton(
-            tooltip: 'Refresh',
+            tooltip: t('common.retry'),
             icon: const Icon(Icons.refresh),
             onPressed: auth.refreshUser,
           ),
@@ -121,21 +122,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const SizedBox(height: 24),
 
                 // --- Editable profile ---
-                Text('Your details',
+                Text(t('settings.your_details'),
                     style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 12),
                 TextField(
                   controller: _name,
-                  decoration: const InputDecoration(
-                    labelText: 'Full name',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: t('settings.name'),
+                    border: const OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 12),
-                _langDropdown('Native language', _native,
+                _langDropdown(t('settings.i_speak'), _native,
                     (v) => setState(() => _native = v)),
                 const SizedBox(height: 12),
-                _langDropdown('Target language', _target,
+                _langDropdown(t('settings.im_learning'), _target,
                     (v) => setState(() => _target = v)),
                 const SizedBox(height: 12),
                 FilledButton(
@@ -145,8 +146,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2))
-                      : const Text('Save'),
+                      : Text(t('common.save')),
                 ),
+
+                const SizedBox(height: 24),
+                const _InterfaceLanguage(),
 
                 const SizedBox(height: 24),
                 const _AppearanceSetting(),
@@ -161,12 +165,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const Divider(),
                 ListTile(
                   leading: const Icon(Icons.logout),
-                  title: const Text('Sign out'),
+                  title: Text(t('account.signout')),
                   onTap: auth.logout,
                 ),
                 ListTile(
                   leading: const Icon(Icons.logout_outlined),
-                  title: const Text('Sign out on all devices'),
+                  title: Text(t('account.signout_all')),
                   onTap: auth.logoutEverywhere,
                 ),
               ],
@@ -183,7 +187,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         border: const OutlineInputBorder(),
       ),
       items: [
-        const DropdownMenuItem(value: null, child: Text('— not set —')),
+        DropdownMenuItem(value: null, child: Text(t('common.not_set'))),
         for (final l in kLanguages)
           DropdownMenuItem(value: l.code, child: Text(l.name)),
       ],
@@ -206,7 +210,7 @@ class _PlanSection extends ConsumerWidget {
     } catch (_) {
       if (context.mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Could not open the page.')));
+            .showSnackBar(SnackBar(content: Text(t('auth.could_not_open'))));
       }
     }
   }
@@ -220,12 +224,14 @@ class _PlanSection extends ConsumerWidget {
       loading: () => const SizedBox.shrink(),
       error: (_, _) => const SizedBox.shrink(),
       data: (s) {
-        final label = s?.label ?? 'Free';
         final active = s?.isActive ?? false;
+        final label = !active
+            ? t('plan.free')
+            : ((s?.isTrial ?? false) ? t('plan.premium_trial') : t('plan.premium'));
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Subscription',
+            Text(t('plan.subscription'),
                 style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             Card(
@@ -238,16 +244,46 @@ class _PlanSection extends ConsumerWidget {
                         ? TextButton(
                             onPressed: () =>
                                 _open(context, ref, repo.portalUrl()),
-                            child: const Text('Manage'))
+                            child: Text(t('plan.manage')))
                         : FilledButton(
                             onPressed: () => _open(
                                 context, ref, repo.checkoutUrl('premium_monthly')),
-                            child: const Text('Upgrade'))),
+                            child: Text(t('plan.upgrade')))),
               ),
             ),
           ],
         );
       },
+    );
+  }
+}
+
+/// Interface language — the language the app's own text is shown in
+/// (independent of which languages the user is learning).
+class _InterfaceLanguage extends ConsumerWidget {
+  const _InterfaceLanguage();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final lang = ref.watch(localeProvider);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(t('settings.ui_language'),
+            style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          initialValue: lang,
+          decoration: const InputDecoration(border: OutlineInputBorder()),
+          items: [
+            for (final code in kUiSupported)
+              DropdownMenuItem(value: code, child: Text(languageName(code))),
+          ],
+          onChanged: (v) {
+            if (v != null) ref.read(localeProvider.notifier).setLang(v);
+          },
+        ),
+      ],
     );
   }
 }
@@ -262,22 +298,23 @@ class _AppearanceSetting extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Appearance', style: Theme.of(context).textTheme.titleMedium),
+        Text(t('appearance.title'),
+            style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         SegmentedButton<ThemeMode>(
-          segments: const [
+          segments: [
             ButtonSegment(
                 value: ThemeMode.system,
-                label: Text('System'),
-                icon: Icon(Icons.brightness_auto)),
+                label: Text(t('appearance.system')),
+                icon: const Icon(Icons.brightness_auto)),
             ButtonSegment(
                 value: ThemeMode.light,
-                label: Text('Light'),
-                icon: Icon(Icons.light_mode)),
+                label: Text(t('appearance.light')),
+                icon: const Icon(Icons.light_mode)),
             ButtonSegment(
                 value: ThemeMode.dark,
-                label: Text('Dark'),
-                icon: Icon(Icons.dark_mode)),
+                label: Text(t('appearance.dark')),
+                icon: const Icon(Icons.dark_mode)),
           ],
           selected: {mode},
           showSelectedIcon: false,
@@ -337,7 +374,7 @@ class _PracticeSettingsState extends ConsumerState<_PracticeSettings> {
       if (mounted) {
         setState(() => _prefs = current); // roll back
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not save the setting.')),
+          SnackBar(content: Text(t('settings.could_not_save'))),
         );
       }
     } finally {
@@ -351,13 +388,12 @@ class _PracticeSettingsState extends ConsumerState<_PracticeSettings> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Practice', style: Theme.of(context).textTheme.titleMedium),
+        Text(t('nav.practice'), style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 4),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
-          title: const Text('Fill matching games with dictionary words'),
-          subtitle: const Text(
-              'When you don’t have enough of your own words, top up “Pairs” rounds with words from the shared dictionary.'),
+          title: Text(t('practice.fillers_toggle')),
+          subtitle: Text(t('practice.fillers_subtitle')),
           value: _prefs!.matchPairsFillers,
           onChanged: _saving ? null : _toggle,
         ),
@@ -382,9 +418,9 @@ class _VerifyBannerState extends ConsumerState<_VerifyBanner> {
     try {
       final sent =
           await ref.read(authControllerProvider.notifier).resendVerification();
-      message = sent ? 'Verification email sent.' : 'Already verified.';
+      message = sent ? t('verify.sent') : t('toast.already_verified');
     } catch (_) {
-      message = 'Could not send the email. Try again.';
+      message = t('toast.verify_send_fail');
     }
     if (!mounted) return;
     setState(() => _busy = false);
@@ -403,7 +439,7 @@ class _VerifyBannerState extends ConsumerState<_VerifyBanner> {
       ),
       child: Row(
         children: [
-          const Expanded(child: Text('Confirm your email to unlock practice.')),
+          Expanded(child: Text(t('verify.unlock'))),
           TextButton(
             onPressed: _busy ? null : _resend,
             child: _busy
@@ -411,7 +447,7 @@ class _VerifyBannerState extends ConsumerState<_VerifyBanner> {
                     height: 16,
                     width: 16,
                     child: CircularProgressIndicator(strokeWidth: 2))
-                : const Text('Resend'),
+                : Text(t('verify.resend_short')),
           ),
         ],
       ),

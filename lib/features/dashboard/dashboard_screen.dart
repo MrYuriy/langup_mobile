@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/i18n.dart';
 import '../../core/mastery.dart';
 import 'dashboard_controller.dart';
 
@@ -13,7 +14,7 @@ class DashboardScreen extends ConsumerWidget {
     final ctrl = ref.read(dashboardControllerProvider.notifier);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Dashboard')),
+      appBar: AppBar(title: Text(t('nav.dashboard'))),
       body: state.loading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
@@ -46,16 +47,20 @@ class DashboardScreen extends ConsumerWidget {
       crossAxisSpacing: 12,
       childAspectRatio: 1.5,
       children: [
-        _StatTile(label: 'Total words', value: '${s.total}', icon: Icons.menu_book),
         _StatTile(
-            label: 'Due now',
+            label: t('dash.total_words'),
+            value: '${s.total}',
+            icon: Icons.menu_book),
+        _StatTile(
+            label: t('dash.due_now'),
             value: s.dueCapped ? '100+' : '${s.dueCount}',
             icon: Icons.schedule),
         _StatTile(
-            label: 'Mastered',
+            label: t('dash.mastered'),
             value: '${s.mastery['MASTERED'] ?? 0}',
             icon: Icons.workspace_premium),
-        _StatTile(label: 'Generated today', value: gen, icon: Icons.auto_awesome),
+        _StatTile(
+            label: t('dash.generated_today'), value: gen, icon: Icons.auto_awesome),
       ],
     );
   }
@@ -103,10 +108,10 @@ class _MasterySection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Mastery', style: Theme.of(context).textTheme.titleMedium),
+        Text(t('dash.mastery'), style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 12),
         if (total == 0)
-          Text('Save words to see your progress here.',
+          Text(t('dash.save_words_hint'),
               style: Theme.of(context)
                   .textTheme
                   .bodyMedium
@@ -154,7 +159,7 @@ class _MasterySection extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 6),
-        Text('${Mastery.label(level)} · $count',
+        Text('${masteryLabel(level)} · $count',
             style: Theme.of(context).textTheme.bodySmall),
       ],
     );
@@ -168,20 +173,22 @@ class _PlanCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sub = state.subscription;
-    final label = sub?.label ?? 'Free';
+    final label = sub == null || !sub.isActive
+        ? t('plan.free')
+        : (sub.isTrial ? t('plan.premium_trial') : t('plan.premium'));
     String? renew;
     if (sub != null && sub.currentPeriodEnd != null) {
-      final when = _date(sub.currentPeriodEnd!);
+      final p = {'date': _date(sub.currentPeriodEnd!)};
       if (sub.isTrial) {
-        renew = 'Trial ends on $when';
+        renew = t('plan.trial_ends', p);
       } else if (sub.isActive) {
-        renew = sub.cancelAtPeriodEnd ? 'Ends on $when' : 'Renews on $when';
+        renew = sub.cancelAtPeriodEnd ? t('plan.ends_on', p) : t('plan.renews_on', p);
       }
     }
     return Card(
       child: ListTile(
         leading: const Icon(Icons.card_membership),
-        title: Text('Plan: $label'),
+        title: Text(t('dash.plan', {'plan': label})),
         subtitle: renew != null ? Text(renew) : null,
       ),
     );

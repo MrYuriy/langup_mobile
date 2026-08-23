@@ -6,6 +6,8 @@ import 'core/i18n.dart';
 import 'core/providers.dart';
 import 'core/router.dart';
 import 'core/theme.dart';
+import 'features/practice/practice_controller.dart';
+import 'features/vocabulary/vocabulary_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,6 +46,16 @@ class _LangUpAppState extends ConsumerState<LangUpApp> {
         (_, native) {
       if (native != null) {
         ref.read(localeProvider.notifier).syncToNative(native);
+      }
+    });
+
+    // Drop cached, user-scoped data when a different account signs in — these
+    // controllers aren't autoDispose, so without this the new user would see the
+    // previous account's words/exercises until a manual refresh.
+    ref.listen(authControllerProvider.select((s) => s.user?.id), (prev, next) {
+      if (next != null && prev != next) {
+        ref.invalidate(vocabularyControllerProvider);
+        ref.invalidate(practiceControllerProvider);
       }
     });
 

@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/i18n.dart';
 
 /// Bottom-navigation shell hosting the authenticated tabs. The branches keep
 /// their own navigation state (go_router's indexed stack).
-class HomeShell extends StatelessWidget {
+class HomeShell extends ConsumerWidget {
   const HomeShell({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // StatefulShellRoute keeps the shell alive across the KeyedSubtree remount
+    // that refreshes the branch content, so watch the locale here too — the nav
+    // labels would otherwise stay in the old language.
+    ref.watch(localeProvider);
     return Scaffold(
       body: navigationShell,
       bottomNavigationBar: NavigationBar(

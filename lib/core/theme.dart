@@ -8,6 +8,8 @@ ThemeData buildTheme(Brightness brightness) {
   return ThemeData(
     colorScheme: ColorScheme.fromSeed(seedColor: _seed, brightness: brightness),
     useMaterial3: true,
+    // Bundled font — consistent typography (and typing-blank width) on any device.
+    fontFamily: 'Poppins',
   );
 }
 

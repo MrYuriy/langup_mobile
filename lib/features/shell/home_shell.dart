@@ -31,6 +31,10 @@ class HomeShell extends ConsumerWidget {
               selectedIcon: const Icon(Icons.menu_book),
               label: t('nav.words')),
           NavigationDestination(
+              icon: const Icon(Icons.queue_music_outlined),
+              selectedIcon: const Icon(Icons.queue_music),
+              label: t('nav.songs')),
+          NavigationDestination(
               icon: const Icon(Icons.fitness_center_outlined),
               selectedIcon: const Icon(Icons.fitness_center),
               label: t('nav.practice')),

@@ -7,6 +7,9 @@ import '../features/auth/language_gate_screen.dart';
 import '../features/auth/login_screen.dart';
 import '../features/auth/splash_screen.dart';
 import '../features/dashboard/dashboard_screen.dart';
+import '../features/playlists/lyrics_reader_screen.dart';
+import '../features/playlists/playlist_songs_screen.dart';
+import '../features/playlists/playlists_screen.dart';
 import '../features/practice/practice_hub_screen.dart';
 import '../features/practice/practice_session_screen.dart';
 import '../features/profile/profile_screen.dart';
@@ -29,11 +32,13 @@ class _AuthRefresh extends ChangeNotifier {
 /// Locations reachable once signed in (shell branches + full-screen pushes).
 const _authedPrefixes = [
   '/words',
+  '/playlists',
   '/practice',
   '/review',
   '/dashboard',
   '/profile',
   '/vocabulary',
+  '/lyrics',
 ];
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -60,12 +65,32 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, _) => const PracticeSessionScreen(),
       ),
 
+      // Playlist songs + lyrics reader (pushed over the shell).
+      GoRoute(
+        path: '/playlists/:uuid',
+        builder: (_, state) => PlaylistSongsScreen(
+          uuid: state.pathParameters['uuid']!,
+          name: state.extra is String ? state.extra as String : '',
+        ),
+      ),
+      GoRoute(
+        path: '/lyrics',
+        builder: (_, state) {
+          final e = (state.extra as Map?)?.cast<String, String>() ?? const {};
+          return LyricsReaderScreen(
+              title: e['title'] ?? '', artist: e['artist'] ?? '');
+        },
+      ),
+
       // Authenticated tabs.
       StatefulShellRoute.indexedStack(
         builder: (_, _, shell) => HomeShell(navigationShell: shell),
         branches: [
           StatefulShellBranch(routes: [
             GoRoute(path: '/words', builder: (_, _) => const VocabularyScreen()),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(path: '/playlists', builder: (_, _) => const PlaylistsScreen()),
           ]),
           StatefulShellBranch(routes: [
             GoRoute(path: '/practice', builder: (_, _) => const PracticeHubScreen()),

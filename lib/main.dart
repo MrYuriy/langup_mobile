@@ -6,6 +6,7 @@ import 'core/i18n.dart';
 import 'core/providers.dart';
 import 'core/router.dart';
 import 'core/theme.dart';
+import 'features/playlists/playlists_controller.dart';
 import 'features/practice/practice_controller.dart';
 import 'features/vocabulary/vocabulary_controller.dart';
 
@@ -56,6 +57,7 @@ class _LangUpAppState extends ConsumerState<LangUpApp> {
       if (next != null && prev != next) {
         ref.invalidate(vocabularyControllerProvider);
         ref.invalidate(practiceControllerProvider);
+        ref.invalidate(playlistsControllerProvider);
       }
     });
 

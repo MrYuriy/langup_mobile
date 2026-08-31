@@ -38,6 +38,18 @@ class I18n {
     lang = l;
   }
 
+  // Locales loaded on demand for text that must be in a language other than the
+  // interface one (the voice demo is read in the language being previewed).
+  final _other = <String, Map<String, String>>{};
+
+  /// One key read from [language]'s own locale, falling back to the active one.
+  /// Sending Ukrainian text to be spoken as English would just garble it.
+  Future<String> phraseIn(String language, String key) async {
+    if (!kUiSupported.contains(language)) return t(key);
+    final locale = _other[language] ??= await _read(language);
+    return locale[key] ?? t(key);
+  }
+
   String t(String key, [Map<String, Object?>? params]) {
     var s = _active[key] ?? _fallback[key] ?? key;
     if (params != null) {

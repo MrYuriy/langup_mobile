@@ -9,6 +9,7 @@ import '../../core/models/exercise_preferences.dart';
 import '../../core/models/subscription.dart';
 import '../../core/providers.dart';
 import '../../core/theme.dart';
+import '../audio/voice_settings.dart';
 import '../dashboard/dashboard_controller.dart' show paymentsRepositoryProvider;
 import '../practice/practice_controller.dart' show exercisesRepositoryProvider;
 
@@ -148,6 +149,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           child: CircularProgressIndicator(strokeWidth: 2))
                       : Text(t('common.save')),
                 ),
+
+                const SizedBox(height: 24),
+                const VoiceSettings(),
 
                 const SizedBox(height: 24),
                 const _InterfaceLanguage(),

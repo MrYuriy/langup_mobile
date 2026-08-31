@@ -37,6 +37,7 @@ class Exercise {
     required this.prompt,
     required this.difficulty,
     required this.payload,
+    required this.language,
   });
 
   final String uuid;
@@ -45,12 +46,18 @@ class Exercise {
   final double? difficulty;
   final Map<String, dynamic> payload;
 
+  /// The language being practised — needed to speak the exercise aloud. The
+  /// client's own language filter can be unset (the server then picks), so the
+  /// exercise carries its own.
+  final String? language;
+
   factory Exercise.fromJson(Map<String, dynamic> json) => Exercise(
         uuid: json['uuid'] as String,
         exerciseType: json['exercise_type'] as String,
         prompt: json['prompt'] as String?,
         difficulty: (json['difficulty'] as num?)?.toDouble(),
         payload: (json['payload'] as Map).cast<String, dynamic>(),
+        language: json['language'] as String?,
       );
 }
 

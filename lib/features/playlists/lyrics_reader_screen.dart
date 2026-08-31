@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/i18n.dart';
 import '../../core/models/playlist.dart';
+import '../audio/speak_button.dart';
 import 'playlists_controller.dart';
 import 'word_state.dart';
 
@@ -284,13 +285,20 @@ class _TranslateSheetState extends State<_TranslateSheet> {
               Text(t('playlist.translating')),
             ])
           else
-            Text.rich(TextSpan(children: [
-              TextSpan(
-                  text: widget.surface,
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
-              const TextSpan(text: '  —  '),
-              TextSpan(text: _translation ?? '—'),
-            ], style: Theme.of(context).textTheme.titleMedium)),
+            Row(
+              children: [
+                Flexible(
+                  child: Text.rich(TextSpan(children: [
+                    TextSpan(
+                        text: widget.surface,
+                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                    const TextSpan(text: '  —  '),
+                    TextSpan(text: _translation ?? '—'),
+                  ], style: Theme.of(context).textTheme.titleMedium)),
+                ),
+                SpeakButton(text: widget.surface, language: widget.language),
+              ],
+            ),
           const SizedBox(height: 20),
           Row(
             children: [

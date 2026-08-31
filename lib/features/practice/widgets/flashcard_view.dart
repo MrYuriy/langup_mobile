@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/i18n.dart';
 import '../../../core/models/exercise.dart';
+import '../../audio/speak_button.dart';
 
 class FlashcardView extends StatefulWidget {
   const FlashcardView({
@@ -43,11 +44,25 @@ class _FlashcardViewState extends State<FlashcardView> {
             child: Card(
               child: Padding(
                 padding: const EdgeInsets.all(20),
-                child: sentence.isEmpty
-                    ? Text(term ?? '',
-                        style: text.headlineSmall
-                            ?.copyWith(fontWeight: FontWeight.bold))
-                    : _highlighted(context, sentence, term ?? ''),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    sentence.isEmpty
+                        ? Text(term ?? '',
+                            style: text.headlineSmall
+                                ?.copyWith(fontWeight: FontWeight.bold))
+                        : _highlighted(context, sentence, term ?? ''),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      // Speak the sentence when there is one, else the word —
+                      // the same choice the web reader makes.
+                      child: SpeakButton(
+                        text: sentence.isEmpty ? term : sentence,
+                        language: widget.exercise.language,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

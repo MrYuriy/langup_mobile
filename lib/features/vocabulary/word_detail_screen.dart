@@ -5,6 +5,7 @@ import '../../core/i18n.dart';
 import '../../core/languages.dart';
 import '../../core/mastery.dart';
 import '../../core/models/user_word.dart';
+import '../audio/speak_button.dart';
 import 'vocabulary_controller.dart';
 
 final _wordDetailProvider =
@@ -46,7 +47,12 @@ class _Detail extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        Text(word.lemma, style: text.headlineMedium),
+        Row(
+          children: [
+            Flexible(child: Text(word.lemma, style: text.headlineMedium)),
+            SpeakButton(text: word.lemma, language: word.language, size: 26),
+          ],
+        ),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,

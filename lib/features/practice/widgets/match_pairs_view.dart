@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../core/models/exercise.dart';
+import '../../audio/speak_button.dart';
 import '../match_pairs_round.dart';
 
 /// Match-pairs round UI. All game logic lives in [MatchPairsRound] (unit-tested):
@@ -183,11 +184,24 @@ class _MatchPairsViewState extends State<MatchPairsView> {
         onTap: () => _pick(side, id),
         child: Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+          padding: EdgeInsets.fromLTRB(12, 16, side == 'left' ? 4 : 12, 16),
           alignment: Alignment.center,
-          child: Text(label,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Flexible(
+                child: Text(label,
+                    textAlign: TextAlign.center,
+                    style:
+                        const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+              ),
+              // Only the word column is spoken; the right column holds the
+              // learner's own language.
+              if (side == 'left')
+                SpeakButton(
+                    text: label, language: widget.exercise.language, size: 18),
+            ],
+          ),
         ),
       ),
     );

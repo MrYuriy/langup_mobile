@@ -8,6 +8,7 @@ import '../../core/i18n.dart';
 import '../../core/languages.dart';
 import '../../core/mastery.dart';
 import '../../core/models/user_word.dart';
+import '../audio/speak_button.dart';
 import 'add_word_sheet.dart';
 import 'vocabulary_controller.dart';
 
@@ -217,9 +218,15 @@ class _WordTile extends StatelessWidget {
         if (word.partOfSpeech != null) word.partOfSpeech!.toLowerCase(),
         masteryLabel(word.masteryLevel),
       ].join(' · ')),
-      trailing: IconButton(
-        icon: const Icon(Icons.delete_outline),
-        onPressed: onDelete,
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SpeakButton(text: word.lemma, language: word.language),
+          IconButton(
+            icon: const Icon(Icons.delete_outline),
+            onPressed: onDelete,
+          ),
+        ],
       ),
     );
   }

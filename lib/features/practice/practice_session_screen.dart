@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/i18n.dart';
 import '../../core/models/exercise.dart';
+import '../audio/speak_button.dart';
 import 'practice_controller.dart';
 import 'widgets/fill_in_blanks_view.dart';
 import 'widgets/flashcard_view.dart';
@@ -116,6 +117,18 @@ class _ResultView extends StatelessWidget {
                 Text(_message(ex, result),
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.titleLarge),
+                // Hear the word that was being practised (web: renderResultAudio).
+                if (_answeredText(ex, result) != null)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(_answeredText(ex, result)!,
+                          style: Theme.of(context).textTheme.titleMedium),
+                      SpeakButton(
+                          text: _answeredText(ex, result),
+                          language: ex.language),
+                    ],
+                  ),
                 if (result.masteryLevel != null) ...[
                   const SizedBox(height: 8),
                   Text(
@@ -136,6 +149,29 @@ class _ResultView extends StatelessWidget {
         FilledButton(onPressed: ctrl.loadNext, child: Text(t('common.next'))),
       ],
     );
+  }
+
+  /// What to speak after answering — a port of the web `answeredText`. For the
+  /// blanked types the sentence is spoken with the correct answers filled in,
+  /// so the learner hears the whole thing said properly.
+  String? _answeredText(Exercise ex, AttemptResult result) {
+    String? text;
+    switch (ex.exerciseType) {
+      case 'MULTIPLE_CHOICE':
+        text = ex.payload['word'] as String?;
+      case 'FLASHCARD':
+        text = (ex.payload['sentence'] as String?) ?? (ex.payload['word'] as String?);
+      case 'TYPING':
+      case 'FILL_IN_BLANKS':
+        final raw = ex.payload['text'] as String? ?? '';
+        text = raw.replaceAllMapped(
+          RegExp(r'___(\d+)___'),
+          (m) => result.correctAnswers[m.group(1)] ?? '…',
+        );
+      default:
+        text = null; // MATCH_PAIRS is a whole board, not one utterance
+    }
+    return (text == null || text.isEmpty) ? null : text;
   }
 
   String _message(Exercise ex, AttemptResult result) {

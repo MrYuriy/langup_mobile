@@ -32,8 +32,24 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _saving = false;
   bool _initialized = false;
 
+  // What was loaded from the account. Save stays disabled until the form
+  // actually differs from this, so the button never invites a no-op PATCH.
+  String _baseName = '';
+  String? _baseNative;
+  String? _baseTarget;
+
+  @override
+  void initState() {
+    super.initState();
+    // Typing has to re-evaluate `_dirty`, so the button can enable itself.
+    _name.addListener(_onNameChanged);
+  }
+
+  void _onNameChanged() => setState(() {});
+
   @override
   void dispose() {
+    _name.removeListener(_onNameChanged);
     _name.dispose();
     super.dispose();
   }
@@ -45,8 +61,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     _name.text = user.fullName ?? '';
     _native = _valid(user.nativeLanguage);
     _target = _valid(user.targetLanguage);
+    _rebase();
     _initialized = true;
   }
+
+  /// Treat the current form as the saved state.
+  void _rebase() {
+    _baseName = _name.text.trim();
+    _baseNative = _native;
+    _baseTarget = _target;
+  }
+
+  bool get _dirty =>
+      _name.text.trim() != _baseName ||
+      _native != _baseNative ||
+      _target != _baseTarget;
 
   String? _valid(String? code) =>
       (code != null && kLanguages.any((l) => l.code == code)) ? code : null;
@@ -59,6 +88,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             nativeLanguage: _native,
             targetLanguage: _target,
           );
+      _rebase();
       _snack(t('toast.saved'));
     } catch (_) {
       _snack(t('toast.save_fail'));
@@ -139,16 +169,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const SizedBox(height: 12),
                 _langDropdown(t('settings.im_learning'), _target,
                     (v) => setState(() => _target = v)),
-                const SizedBox(height: 12),
-                FilledButton(
-                  onPressed: _saving ? null : _save,
-                  child: _saving
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2))
-                      : Text(t('common.save')),
-                ),
 
                 const SizedBox(height: 24),
                 const VoiceSettings(),
@@ -164,6 +184,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
                 const SizedBox(height: 24),
                 _PlanSection(),
+
+                const SizedBox(height: 28),
+                // Save lives at the end of the form and only lights up once the
+                // details above actually differ from what is stored.
+                FilledButton(
+                  onPressed: (_saving || !_dirty) ? null : _save,
+                  child: _saving
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2))
+                      : Text(t('common.save')),
+                ),
 
                 const SizedBox(height: 24),
                 const Divider(),

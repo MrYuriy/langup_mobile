@@ -9,6 +9,7 @@ import '../../core/models/exercise_preferences.dart';
 import '../../core/models/subscription.dart';
 import '../../core/providers.dart';
 import '../../core/theme.dart';
+import '../audio/voice_controller.dart';
 import '../audio/voice_settings.dart';
 import '../dashboard/dashboard_controller.dart' show paymentsRepositoryProvider;
 import '../practice/practice_controller.dart' show exercisesRepositoryProvider;
@@ -75,7 +76,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool get _dirty =>
       _name.text.trim() != _baseName ||
       _native != _baseNative ||
-      _target != _baseTarget;
+      _target != _baseTarget ||
+      // Voice choices are staged too, so picking one lights up the same button.
+      ref.watch(voiceControllerProvider).dirty;
 
   String? _valid(String? code) =>
       (code != null && kLanguages.any((l) => l.code == code)) ? code : null;
@@ -88,8 +91,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             nativeLanguage: _native,
             targetLanguage: _target,
           );
+      final voicesOk = await ref.read(voiceControllerProvider.notifier).save();
       _rebase();
-      _snack(t('toast.saved'));
+      _snack(voicesOk ? t('toast.saved') : t('toast.save_fail'));
     } catch (_) {
       _snack(t('toast.save_fail'));
     } finally {

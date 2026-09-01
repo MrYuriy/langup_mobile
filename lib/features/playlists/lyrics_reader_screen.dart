@@ -9,7 +9,11 @@ import 'playlists_controller.dart';
 import 'word_state.dart';
 
 /// Screen 3 — the song's lyrics, every word coloured by the learner's state.
-/// Tapping an unknown (red) word translates it in context and offers to add it.
+///
+/// Tapping a word they don't have yet translates it in context and offers to
+/// add it. That includes the plain "common" ones: they are only left unmarked
+/// because flagging every "take" and "away" would bury the words that matter.
+/// Words already saved just play back.
 class LyricsReaderScreen extends ConsumerStatefulWidget {
   const LyricsReaderScreen({super.key, required this.title, required this.artist});
 
@@ -46,10 +50,10 @@ class _LyricsReaderScreenState extends ConsumerState<LyricsReaderScreen> {
         .analyze(widget.title, widget.artist);
     if (!mounted) return;
     if (res.lyrics != null) {
-      // A recognizer per initially-unknown token — the only tappable ones.
+      // A recognizer per tappable token (everything but punctuation).
       for (final line in res.lyrics!.lines) {
         for (final tok in line.tokens) {
-          if (tok.status == 'unknown') {
+          if (tok.isTappable) {
             _recognizers[tok] =
                 TapGestureRecognizer()..onTap = () => _onTapWord(tok, line);
           }
@@ -69,6 +73,18 @@ class _LyricsReaderScreenState extends ConsumerState<LyricsReaderScreen> {
 
   void _onTapWord(LyricToken token, LyricLine line) {
     if (!token.isTappable) return;
+    // Words already in the dictionary have nothing to look up — they just play.
+    if (!token.offersTranslation) {
+      showModalBottomSheet(
+        context: context,
+        showDragHandle: true,
+        builder: (_) => _ListenSheet(
+          surface: token.surface,
+          language: _lyrics!.language,
+        ),
+      );
+      return;
+    }
     showModalBottomSheet(
       context: context,
       showDragHandle: true,
@@ -78,7 +94,7 @@ class _LyricsReaderScreenState extends ConsumerState<LyricsReaderScreen> {
         language: _lyrics!.language,
         translate: (w, l, lang) => ref
             .read(playlistsRepositoryProvider)
-            .translate(word: w, line: l, language: lang),
+            .translate(word: w, lemma: token.lemma, line: l, language: lang),
         onAdd: (known) => _addWord(token, known),
       ),
     );
@@ -172,14 +188,15 @@ class _LyricsReaderScreenState extends ConsumerState<LyricsReaderScreen> {
                       text: tok.surface,
                       style: TextStyle(
                         color: WordState.forStatus(tok.status, bodyColor),
-                        fontWeight:
-                            tok.status == 'skip' ? FontWeight.normal : FontWeight.w600,
+                        fontWeight: (tok.status == 'skip' || tok.status == 'common')
+                            ? FontWeight.normal
+                            : FontWeight.w600,
                         decoration: tok.status == 'unknown'
                             ? TextDecoration.underline
                             : null,
                         decorationStyle: TextDecorationStyle.dotted,
                       ),
-                      recognizer: tok.isTappable ? _recognizers[tok] : null,
+                      recognizer: _recognizers[tok],
                     ),
                 ]),
                 style: const TextStyle(fontSize: 17, height: 2.0),
@@ -317,6 +334,35 @@ class _TranslateSheetState extends State<_TranslateSheet> {
               ),
             ],
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Bottom sheet for a word already in the dictionary: nothing to look up, but
+/// still worth hearing.
+class _ListenSheet extends StatelessWidget {
+  const _ListenSheet({required this.surface, required this.language});
+
+  final String surface;
+  final String language;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(
+            child: Text(surface,
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold)),
+          ),
+          SpeakButton(text: surface, language: language),
         ],
       ),
     );

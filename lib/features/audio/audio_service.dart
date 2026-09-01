@@ -98,6 +98,16 @@ class AudioService {
     }
   }
 
+  /// Forget every resolved URL.
+  ///
+  /// Most clips are requested with `voice: null`, meaning "whatever the learner
+  /// has chosen for this language" — so the cache key does not change when that
+  /// choice does, and a word played before the switch would keep coming back in
+  /// the old voice. The web never noticed: its cache is per page load, and the
+  /// picker lives on a different page. Here the service outlives the screen, so
+  /// the picker has to tell it the answer changed.
+  void clearCache() => _urls.clear();
+
   void dispose() => _player.dispose();
 }
 

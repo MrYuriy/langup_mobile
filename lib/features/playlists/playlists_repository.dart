@@ -73,11 +73,14 @@ class PlaylistsRepository {
   /// Translates one word in the context of its line. May return null.
   Future<String?> translate({
     required String word,
+    String? lemma,
     required String line,
     required String language,
   }) async {
+    // The word goes as it appears in the song (surface form); the lemma rides
+    // along because the offline lemmatizer occasionally mangles a word.
     final resp = await _dio.post('/playlists/song/translate',
-        data: {'word': word, 'line': line, 'language': language});
+        data: {'word': word, 'lemma': lemma, 'line': line, 'language': language});
     _ok(resp);
     return (resp.data as Map)['translation'] as String?;
   }

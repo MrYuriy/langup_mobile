@@ -15,7 +15,9 @@ class WordState {
       case 'unknown':
         return unknown;
       default:
-        return bodyColor; // skip — plain body colour
+        // common and skip both read as plain text: flagging every "take" and
+        // "away" in colour would bury the words that need attention.
+        return bodyColor;
     }
   }
 }

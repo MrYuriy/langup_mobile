@@ -96,7 +96,14 @@ class ImportStatus {
 }
 
 /// One chunk of a lyric line — matches `AnalyzedToken`.
-/// status: known | learning | unknown | skip.
+///
+/// status:
+///   known    -> mastered (green)
+///   learning -> in the vocabulary, not mastered yet (amber)
+///   unknown  -> a word they don't have yet (red)
+///   common   -> too frequent to flag, but still a word: drawn plain so the page
+///               is not a wall of red, yet offered like an unknown one
+///   skip     -> punctuation, whitespace, interjections, articles — inert
 class LyricToken {
   LyricToken({required this.surface, required this.lemma, required this.status});
 
@@ -104,7 +111,13 @@ class LyricToken {
   final String? lemma;
   String status; // mutable: recoloured after a word is added
 
-  bool get isTappable => status == 'unknown';
+  /// Everything except punctuation responds to a tap, so the interaction is the
+  /// same everywhere rather than only red words answering.
+  bool get isTappable => status != 'skip';
+
+  /// Words not yet in the dictionary open translate-then-keep-or-learn; the ones
+  /// already saved only offer playback.
+  bool get offersTranslation => status == 'unknown' || status == 'common';
 
   factory LyricToken.fromJson(Map<String, dynamic> json) => LyricToken(
         surface: json['surface'] as String? ?? '',

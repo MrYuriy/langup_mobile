@@ -80,6 +80,10 @@ class _VoiceSettingsState extends ConsumerState<VoiceSettings> {
           defaults: _voices!.defaults,
         ));
 
+    // Clips already resolved were URLs for the previous voice; keeping them
+    // would replay a word in the voice just replaced.
+    ref.read(audioServiceProvider).clearCache();
+
     final userId = ref.read(authControllerProvider).user?.id;
     if (userId == null) return;
     final ok = await ref.read(voicesRepositoryProvider).save(userId, current);

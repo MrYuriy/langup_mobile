@@ -39,6 +39,9 @@ dependencies:
   flutter_secure_storage: ^11.0.0
   go_router: ^17.5.0
   google_sign_in: ^7.2.0
+  # Direct, not transitive: the web build imports web_only.dart for
+  # renderButton, which is the only sign-in entry point a browser allows.
+  google_sign_in_web: ^1.1.3
   url_launcher: ^6.3.2
   just_audio: ^0.10.6
 

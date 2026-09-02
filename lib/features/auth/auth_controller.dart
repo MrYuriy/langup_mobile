@@ -88,9 +88,18 @@ class AuthController extends StateNotifier<AuthState> {
       _apply(await _repo.register(email, password, name));
 
   /// Interactive Google sign-in. Does nothing if the user cancels.
+  ///
+  /// Mobile only: on web the browser will not let us open the account chooser,
+  /// so Google's rendered button hands us a token through
+  /// [signInWithGoogleToken] instead.
   Future<void> signInWithGoogle() async {
     final idToken = await _google.signIn();
     if (idToken == null) return; // canceled
+    await signInWithGoogleToken(idToken);
+  }
+
+  /// Exchange an id_token Google already issued for our own session.
+  Future<void> signInWithGoogleToken(String idToken) async {
     await _apply(await _repo.googleLogin(idToken));
   }
 

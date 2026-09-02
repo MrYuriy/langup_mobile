@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/i18n.dart';
 import '../../core/providers.dart';
 import 'auth_repository.dart';
+import 'google_button.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -48,6 +49,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       setState(() => _error = e.message);
     } catch (_) {
       setState(() => _error = t('toast.network_error'));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  /// Web: Google authenticated the user itself and handed us the token.
+  Future<void> _googleToken(String idToken) async {
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      await ref.read(authControllerProvider.notifier).signInWithGoogleToken(idToken);
+      // On success the router redirects.
+    } on AuthException catch (e) {
+      setState(() => _error = e.message);
+    } catch (_) {
+      setState(() => _error = t('toast.signin_fail'));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -181,13 +200,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           : t('auth.create_account')),
                     ),
                     const Divider(height: 32),
-                    // Requires an Android OAuth client (package name + signing
-                    // SHA-1) / iOS client in the same Google Cloud project — see
-                    // the mobile README.
-                    OutlinedButton.icon(
+                    // Mobile needs an Android OAuth client (package name +
+                    // signing SHA-1) / iOS client in the same Google Cloud
+                    // project — see the mobile README. On web this renders
+                    // Google's own button, which is the only sign-in a browser
+                    // will allow, and reports back through onIdToken.
+                    GoogleSignInButton(
+                      label: 'Continue with Google',
                       onPressed: _busy ? null : _google,
-                      icon: const Icon(Icons.g_mobiledata),
-                      label: const Text('Continue with Google'),
+                      onIdToken: _busy ? null : _googleToken,
                     ),
                   ],
                 ),

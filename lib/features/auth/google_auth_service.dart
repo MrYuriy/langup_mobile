@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../core/config.dart';
@@ -17,21 +18,33 @@ class GoogleAuthService {
   final GoogleSignIn _signIn;
   Future<void>? _init;
 
-  Future<void> _ensureInitialized() {
+  /// Shared by the mobile flow and the web button, so both configure the SDK
+  /// the same way.
+  ///
+  /// The parameter differs by platform and is not interchangeable: the web
+  /// plugin asserts serverClientId is null and wants the same Web client id as
+  /// `clientId`, while on Android/iOS it is `serverClientId` that makes Google
+  /// mint an id_token whose audience the backend accepts.
+  Future<void> ensureInitialized() {
     return _init ??= _signIn.initialize(
-      serverClientId: AppConfig.googleServerClientId,
+      clientId: kIsWeb ? AppConfig.googleServerClientId : null,
+      serverClientId: kIsWeb ? null : AppConfig.googleServerClientId,
     );
   }
 
   /// Runs the interactive Google sign-in and returns the id_token.
   /// Returns `null` if the user cancels. Throws [AuthException] otherwise.
+  ///
+  /// Web does not come through here: a browser will not open the account
+  /// chooser from arbitrary code, so the plugin refuses `authenticate()` and
+  /// requires Google's own rendered button instead — see GoogleSignInButton.
   Future<String?> signIn() async {
     if (!_signIn.supportsAuthenticate()) {
       throw AuthException(
         'Google Sign-In is not supported on this platform build yet.',
       );
     }
-    await _ensureInitialized();
+    await ensureInitialized();
     try {
       final account = await _signIn.authenticate();
       final idToken = account.authentication.idToken;

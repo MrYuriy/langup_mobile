@@ -15,7 +15,7 @@ class ReviewScreen extends ConsumerWidget {
     final ctrl = ref.read(reviewControllerProvider.notifier);
 
     return Scaffold(
-      appBar: AppBar(title: Text(t('nav.review'))),
+      appBar: AppBar(title: Text(t('title.review'))),
       body: SafeArea(child: _body(context, state, ctrl)),
     );
   }

@@ -68,13 +68,30 @@ class _LangUpAppState extends ConsumerState<LangUpApp> {
       darkTheme: buildTheme(Brightness.dark),
       themeMode: themeMode,
       routerConfig: router,
-      // go_router caches route pages, so a MaterialApp rebuild alone leaves most
-      // screens on the old language. Keying the routed subtree by the current
-      // language forces every visible screen to rebuild when it changes.
-      builder: (context, child) => KeyedSubtree(
-        key: ValueKey(locale),
-        child: child ?? const SizedBox.shrink(),
-      ),
+      builder: (context, child) {
+        // Respect the reader's text size, but not without limit. A browser
+        // carries its own text-scaling preference on top of the system one —
+        // Chrome on Android has a slider of its own — so the same phone can
+        // render the app noticeably larger in a tab than in the installed app,
+        // which is what makes six navigation labels stop fitting.
+        //
+        // 1.3 keeps larger text genuinely usable while leaving the layout
+        // standing; beyond that the labels wrap and the screen fights itself.
+        final media = MediaQuery.of(context);
+        return MediaQuery(
+          data: media.copyWith(
+            textScaler: media.textScaler.clamp(minScaleFactor: 1.0, maxScaleFactor: 1.3),
+          ),
+          // go_router caches route pages, so a MaterialApp rebuild alone leaves
+          // most screens on the old language. Keying the routed subtree by the
+          // current language forces every visible screen to rebuild when it
+          // changes.
+          child: KeyedSubtree(
+            key: ValueKey(locale),
+            child: child ?? const SizedBox.shrink(),
+          ),
+        );
+      },
     );
   }
 }

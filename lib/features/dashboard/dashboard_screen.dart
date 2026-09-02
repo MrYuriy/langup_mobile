@@ -14,7 +14,7 @@ class DashboardScreen extends ConsumerWidget {
     final ctrl = ref.read(dashboardControllerProvider.notifier);
 
     return Scaffold(
-      appBar: AppBar(title: Text(t('nav.dashboard'))),
+      appBar: AppBar(title: Text(t('title.dashboard'))),
       body: state.loading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(

@@ -10,6 +10,26 @@ ThemeData buildTheme(Brightness brightness) {
     useMaterial3: true,
     // Bundled font — consistent typography (and typing-blank width) on any device.
     fontFamily: 'Poppins',
+    // Six destinations share the width: on a 360dp phone — the narrowest common
+    // one, and what a browser reports even on a wider device, since Chrome
+    // quantises the pixel ratio — that leaves about 52dp per label.
+    //
+    // Measured against that, the default 12dp overflows eight of the 48 labels
+    // across our languages; 10dp overflows three, which are then shortened in
+    // the locale files. Below 10dp the bar reads as fine print for the sake of
+    // one French phrase.
+    //
+    // The bar's own height is deliberately left alone: Material sized it for
+    // two lines, so a label that still wraps wraps cleanly instead of clipping.
+    navigationBarTheme: NavigationBarThemeData(
+      labelTextStyle: WidgetStateProperty.resolveWith(
+        (states) => TextStyle(
+          fontSize: 10,
+          height: 1.2,
+          fontWeight: states.contains(WidgetState.selected) ? FontWeight.w600 : FontWeight.w500,
+        ),
+      ),
+    ),
   );
 }
 

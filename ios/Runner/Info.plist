@@ -66,5 +66,28 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<!-- Google Sign-In.
+	     GIDClientID / the URL scheme below come from the *iOS* OAuth client in
+	     Google Cloud (Credentials -> Create client -> iOS, bundle ID
+	     com.langup.langupMobile). The scheme is that client id with its two
+	     dot-separated halves swapped — Google calls it the "reversed client id"
+	     and shows it in the client's detail page.
+	     GIDServerClientID is the backend's WEB client: it is what makes Google
+	     mint an id_token the server will accept. -->
+	<key>GIDClientID</key>
+	<string>REPLACE_WITH_IOS_CLIENT_ID.apps.googleusercontent.com</string>
+	<key>GIDServerClientID</key>
+	<string>471613816800-9smmatdn665mn85tivimn9dh1iegto76.apps.googleusercontent.com</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.REPLACE_WITH_IOS_CLIENT_ID</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

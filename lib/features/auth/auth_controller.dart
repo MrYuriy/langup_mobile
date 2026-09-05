@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/api_client.dart';
@@ -140,10 +142,18 @@ class AuthController extends StateNotifier<AuthState> {
     await _apply(user);
   }
 
+  /// End the session.
+  ///
+  /// The state flips as soon as OUR OWN tokens are gone; Google is told
+  /// afterwards and is not awaited. Nothing third-party may sit between the
+  /// button and the new status — the router redirects on this status change
+  /// alone, so a call that hangs (which the web Google SDK does when it was
+  /// never initialized) would strand the user on the screen they just asked
+  /// to leave.
   Future<void> logout() async {
     await _repo.logout();
-    await _google.signOut();
     state = const AuthState(status: AuthStatus.unauthenticated);
+    unawaited(_google.signOut());
   }
 
   Future<void> logoutEverywhere() async {

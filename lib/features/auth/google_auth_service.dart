@@ -16,7 +16,15 @@ class GoogleAuthService {
       : _signIn = signIn ?? GoogleSignIn.instance;
 
   final GoogleSignIn _signIn;
-  Future<void>? _init;
+
+  /// Static, not per-instance: [GoogleSignIn.instance] is a singleton whose
+  /// `initialize()` may run only once per page load — a second call throws
+  /// StateError. Widgets build this service freely (the web sign-in button
+  /// makes its own), so the memo has to be shared by every instance.
+  static Future<void>? _init;
+
+  /// True only once initialization has actually SUCCEEDED — see [signOut].
+  static bool _ready = false;
 
   /// Shared by the mobile flow and the web button, so both configure the SDK
   /// the same way.
@@ -26,10 +34,14 @@ class GoogleAuthService {
   /// `clientId`, while on Android/iOS it is `serverClientId` that makes Google
   /// mint an id_token whose audience the backend accepts.
   Future<void> ensureInitialized() {
-    return _init ??= _signIn.initialize(
-      clientId: kIsWeb ? AppConfig.googleServerClientId : null,
-      serverClientId: kIsWeb ? null : AppConfig.googleServerClientId,
-    );
+    return _init ??= _signIn
+        .initialize(
+          clientId: kIsWeb ? AppConfig.googleServerClientId : null,
+          serverClientId: kIsWeb ? null : AppConfig.googleServerClientId,
+        )
+        .then((_) {
+      _ready = true;
+    });
   }
 
   /// Runs the interactive Google sign-in and returns the id_token.
@@ -58,9 +70,18 @@ class GoogleAuthService {
     }
   }
 
+  /// Best-effort sign-out of the Google SDK.
+  ///
+  /// Guarded by [_ready] because on web the plugin's `signOut()` starts with
+  /// `await _initialized` — a Completer that ONLY a finished `init()` ever
+  /// completes. Called before that, it returns a Future that never completes:
+  /// not an error a catch can see, just a permanent hang. The timeout covers
+  /// the remaining case, an init that started but never finished (the GIS
+  /// script failed to load).
   Future<void> signOut() async {
+    if (!_ready) return;
     try {
-      await _signIn.signOut();
+      await _signIn.signOut().timeout(const Duration(seconds: 5));
     } catch (_) {
       // Best-effort; the app already cleared its own session.
     }

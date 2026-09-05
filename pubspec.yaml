@@ -44,6 +44,10 @@ dependencies:
   google_sign_in_web: ^1.1.3
   url_launcher: ^6.3.2
   just_audio: ^0.10.6
+  # Direct, not transitive: iOS will not play a deliberate tap through the
+  # default audio category while the ring/silent switch is on, so the session
+  # has to be configured explicitly — see AudioService._ensureSession.
+  audio_session: ^0.2.4
 
 dev_dependencies:
   flutter_test:

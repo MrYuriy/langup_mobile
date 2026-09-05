@@ -1,3 +1,5 @@
+import 'package:audio_session/audio_session.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 
@@ -22,6 +24,9 @@ class AudioService {
   final _player = AudioPlayer();
   final _urls = <String, String>{};
 
+  /// Memoized iOS audio-session setup — see [_ensureSession].
+  Future<void>? _session;
+
   /// Incremented per request: a slow resolve must not hijack playback started
   /// by a newer tap.
   int _token = 0;
@@ -41,6 +46,27 @@ class AudioService {
 
   static String keyFor(String text, String language, [String? voice]) =>
       '$text|$language|${voice ?? ''}';
+
+  /// Give iOS an audio category the ring/silent switch does not mute.
+  ///
+  /// iOS defaults to `soloAmbient`, which the hardware switch silences — so a
+  /// phone on silent plays a clip perfectly and inaudibly, and the button looks
+  /// broken. `speech()` asks for `playback` + `spokenAudio`, which is exempt:
+  /// the learner tapped the button on purpose, so it should be heard.
+  ///
+  /// iOS only. Android and the web have no such switch and no session to set
+  /// up, so they never come through here and behave exactly as before.
+  Future<void> _ensureSession() async {
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.iOS) return;
+    try {
+      await (_session ??= AudioSession.instance.then(
+          (s) => s.configure(const AudioSessionConfiguration.speech())));
+    } catch (_) {
+      // Never let session setup stop playback: drop the memo so a later tap
+      // retries, and try to play regardless.
+      _session = null;
+    }
+  }
 
   Future<String> _resolveUrl(String text, String language, String? voice) async {
     final key = keyFor(text, language, voice);
@@ -82,6 +108,8 @@ class AudioService {
     _notify();
     final token = ++_token;
     try {
+      await _ensureSession();
+      if (token != _token) return;
       final url = await _resolveUrl(text, language, voice);
       if (token != _token) return; // a newer tap won the race
       await _player.setUrl(url);

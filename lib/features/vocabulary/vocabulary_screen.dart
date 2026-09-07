@@ -174,15 +174,20 @@ class _VocabularyScreenState extends ConsumerState<VocabularyScreen> {
   Future<void> _confirmDelete(UserWord word, VocabularyController ctrl) async {
     final ok = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
+      // The dialog's OWN context, not the screen's. showDialog puts the
+      // dialog on the root navigator, while this screen sits inside the
+      // shell's branch navigator — popping with the screen's context takes
+      // the screen down and leaves the dialog up, so this never returns and
+      // the delete below never runs.
+      builder: (dialogContext) => AlertDialog(
         title: Text(t('words.remove_title', {'word': word.lemma})),
         content: Text(t('words.remove_body')),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context, false),
+              onPressed: () => Navigator.pop(dialogContext, false),
               child: Text(t('common.cancel'))),
           FilledButton(
-              onPressed: () => Navigator.pop(context, true),
+              onPressed: () => Navigator.pop(dialogContext, true),
               child: Text(t('common.remove'))),
         ],
       ),

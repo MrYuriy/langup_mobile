@@ -48,14 +48,17 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen> {
   Future<void> _confirmDelete(Playlist p) async {
     final ok = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
+      // The dialog's own context — see the note in vocabulary_screen: the
+      // screen's context reaches the shell branch's navigator, not the root
+      // one the dialog was pushed onto.
+      builder: (dialogContext) => AlertDialog(
         content: Text(t('playlist.delete_confirm')),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context, false),
+              onPressed: () => Navigator.pop(dialogContext, false),
               child: Text(t('common.cancel'))),
           FilledButton(
-              onPressed: () => Navigator.pop(context, true),
+              onPressed: () => Navigator.pop(dialogContext, true),
               child: Text(t('common.remove'))),
         ],
       ),

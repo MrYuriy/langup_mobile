@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../../core/api_client.dart';
 import '../../core/models/due_word.dart';
+import '../../core/models/streak.dart';
 
 /// Spaced-repetition endpoints (`/review`, from `routers/learning.py`).
 class ReviewRepository {
@@ -17,6 +18,20 @@ class ReviewRepository {
       for (final e in (resp.data as List))
         DueWord.fromJson((e as Map).cast<String, dynamic>()),
     ];
+  }
+
+  /// The practice run, counted in the learner's own days.
+  ///
+  /// The offset goes with the request because which day an attempt belongs to
+  /// is decided at the learner's midnight, not the server's: practising just
+  /// after midnight here is the previous day in UTC, and counting that way
+  /// would break a streak they had in fact kept.
+  Future<Streak> streak() async {
+    final resp = await _dio.get('/review/streak', queryParameters: {
+      'tz_offset_minutes': DateTime.now().timeZoneOffset.inMinutes,
+    });
+    _ok(resp);
+    return Streak.fromJson((resp.data as Map).cast<String, dynamic>());
   }
 
   /// Grade a review (SM-2 quality 0-5). Returns the new mastery level.

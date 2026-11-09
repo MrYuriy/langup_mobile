@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/models/exercise.dart';
+import '../../core/models/streak.dart';
 import '../../core/models/subscription.dart';
 import '../../core/providers.dart';
 import '../payments/payments_repository.dart';
@@ -19,6 +20,7 @@ class DashboardState {
     this.dueCapped = false,
     this.quota,
     this.subscription,
+    this.streak,
   });
 
   final bool loading;
@@ -28,6 +30,7 @@ class DashboardState {
   final bool dueCapped;
   final GenerationQuota? quota;
   final Subscription? subscription;
+  final Streak? streak;
 
   DashboardState copyWith({
     bool? loading,
@@ -37,6 +40,7 @@ class DashboardState {
     bool? dueCapped,
     GenerationQuota? quota,
     Subscription? subscription,
+    Streak? streak,
   }) {
     return DashboardState(
       loading: loading ?? this.loading,
@@ -46,6 +50,7 @@ class DashboardState {
       dueCapped: dueCapped ?? this.dueCapped,
       quota: quota ?? this.quota,
       subscription: subscription ?? this.subscription,
+      streak: streak ?? this.streak,
     );
   }
 }
@@ -63,6 +68,7 @@ class DashboardController extends StateNotifier<DashboardState> {
     final vocabF = _ref.read(vocabularyRepositoryProvider).list(limit: 1000);
     final dueF = _ref.read(reviewRepositoryProvider).next(limit: 100);
     final quotaF = _ref.read(exercisesRepositoryProvider).quota();
+    final streakF = _ref.read(reviewRepositoryProvider).streak();
     final subF = _ref.read(paymentsRepositoryProvider).subscription();
 
     var next = state.copyWith(loading: false);
@@ -84,6 +90,10 @@ class DashboardController extends StateNotifier<DashboardState> {
 
     try {
       next = next.copyWith(quota: await quotaF);
+    } catch (_) {}
+
+    try {
+      next = next.copyWith(streak: await streakF);
     } catch (_) {}
 
     try {

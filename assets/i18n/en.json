@@ -295,5 +295,20 @@
   "verify.unlock": "Confirm your email to unlock practice.",
   "verify.resend_short": "Resend",
   "verify.sent": "Verification email sent.",
-  "settings.could_not_save": "Could not save the setting."
+  "settings.could_not_save": "Could not save the setting.",
+  "playlist.understood": "{n}% understood",
+  "dash.streak": "day streak",
+  "dash.streak_best": "best",
+  "dash.streak_today_done": "Done for today — nice work.",
+  "dash.streak_keep_going": "Practise today to keep it going.",
+  "dash.streak_last_chance": "Last chance today to keep the streak.",
+  "dash.streak_none": "Practise today to start a streak.",
+  "reminder.title": "Time to practise",
+  "reminder.body": "A few minutes keeps your streak alive.",
+  "reminder.channel": "Study reminders",
+  "reminder.channel_desc": "A daily nudge at the time you chose.",
+  "settings.reminder": "Daily reminder",
+  "settings.reminder_off": "Off",
+  "settings.reminder_at": "Every day at {time}",
+  "settings.reminder_denied": "Notifications are turned off in system settings."
 }

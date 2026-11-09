@@ -295,5 +295,20 @@
   "verify.unlock": "Підтвердьте email, щоб відкрити практику.",
   "verify.resend_short": "Надіслати ще",
   "verify.sent": "Лист підтвердження надіслано.",
-  "settings.could_not_save": "Не вдалося зберегти налаштування."
+  "settings.could_not_save": "Не вдалося зберегти налаштування.",
+  "playlist.understood": "зрозуміло {n}%",
+  "dash.streak": "днів поспіль",
+  "dash.streak_best": "найдовша",
+  "dash.streak_today_done": "На сьогодні зроблено — молодець.",
+  "dash.streak_keep_going": "Повчіться сьогодні, щоб не обірвати.",
+  "dash.streak_last_chance": "Сьогодні останній день, щоб зберегти серію.",
+  "dash.streak_none": "Повчіться сьогодні, щоб почати серію.",
+  "reminder.title": "Час повчитися",
+  "reminder.body": "Кілька хвилин — і серія не обірветься.",
+  "reminder.channel": "Нагадування про навчання",
+  "reminder.channel_desc": "Щоденний сигнал у вибраний вами час.",
+  "settings.reminder": "Щоденне нагадування",
+  "settings.reminder_off": "Вимкнено",
+  "settings.reminder_at": "Щодня о {time}",
+  "settings.reminder_denied": "Сповіщення вимкнені в налаштуваннях системи."
 }

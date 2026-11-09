@@ -295,5 +295,20 @@
   "verify.unlock": "Confirma tu email para desbloquear la práctica.",
   "verify.resend_short": "Reenviar",
   "verify.sent": "Email de verificación enviado.",
-  "settings.could_not_save": "No se pudo guardar el ajuste."
+  "settings.could_not_save": "No se pudo guardar el ajuste.",
+  "playlist.understood": "{n}% comprendido",
+  "dash.streak": "días seguidos",
+  "dash.streak_best": "mejor",
+  "dash.streak_today_done": "Hecho por hoy: bien.",
+  "dash.streak_keep_going": "Practica hoy para mantenerla.",
+  "dash.streak_last_chance": "Hoy es el último día para mantener la racha.",
+  "dash.streak_none": "Practica hoy para empezar una racha.",
+  "reminder.title": "Hora de practicar",
+  "reminder.body": "Unos minutos mantienen tu racha.",
+  "reminder.channel": "Recordatorios de estudio",
+  "reminder.channel_desc": "Un aviso diario a la hora que elijas.",
+  "settings.reminder": "Recordatorio diario",
+  "settings.reminder_off": "Desactivado",
+  "settings.reminder_at": "Todos los días a las {time}",
+  "settings.reminder_denied": "Las notificaciones están desactivadas en los ajustes."
 }

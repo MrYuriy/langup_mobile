@@ -295,5 +295,20 @@
   "verify.unlock": "Potwierdź email, aby odblokować ćwiczenia.",
   "verify.resend_short": "Wyślij ponownie",
   "verify.sent": "Wysłano e-mail weryfikacyjny.",
-  "settings.could_not_save": "Nie udało się zapisać ustawienia."
+  "settings.could_not_save": "Nie udało się zapisać ustawienia.",
+  "playlist.understood": "rozumiesz {n}%",
+  "dash.streak": "dni z rzędu",
+  "dash.streak_best": "najdłuższa",
+  "dash.streak_today_done": "Na dziś zrobione — dobra robota.",
+  "dash.streak_keep_going": "Poucz się dziś, by nie przerwać.",
+  "dash.streak_last_chance": "Dziś ostatni dzień, by zachować serię.",
+  "dash.streak_none": "Poucz się dziś, by rozpocząć serię.",
+  "reminder.title": "Czas na naukę",
+  "reminder.body": "Kilka minut i seria nie przepadnie.",
+  "reminder.channel": "Przypomnienia o nauce",
+  "reminder.channel_desc": "Codzienny sygnał o wybranej godzinie.",
+  "settings.reminder": "Codzienne przypomnienie",
+  "settings.reminder_off": "Wyłączone",
+  "settings.reminder_at": "Codziennie o {time}",
+  "settings.reminder_denied": "Powiadomienia są wyłączone w ustawieniach systemu."
 }

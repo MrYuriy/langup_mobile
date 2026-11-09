@@ -295,5 +295,20 @@
   "verify.unlock": "Conferma l'email per sbloccare la pratica.",
   "verify.resend_short": "Reinvia",
   "verify.sent": "Email di verifica inviata.",
-  "settings.could_not_save": "Impossibile salvare l'impostazione."
+  "settings.could_not_save": "Impossibile salvare l'impostazione.",
+  "playlist.understood": "{n}% compreso",
+  "dash.streak": "giorni di fila",
+  "dash.streak_best": "record",
+  "dash.streak_today_done": "Fatto per oggi — bravo.",
+  "dash.streak_keep_going": "Esercitati oggi per non interromperla.",
+  "dash.streak_last_chance": "Oggi è l'ultimo giorno per la serie.",
+  "dash.streak_none": "Esercitati oggi per iniziare una serie.",
+  "reminder.title": "È ora di esercitarsi",
+  "reminder.body": "Pochi minuti e la serie continua.",
+  "reminder.channel": "Promemoria di studio",
+  "reminder.channel_desc": "Un promemoria giornaliero all'ora scelta.",
+  "settings.reminder": "Promemoria giornaliero",
+  "settings.reminder_off": "Disattivato",
+  "settings.reminder_at": "Ogni giorno alle {time}",
+  "settings.reminder_denied": "Le notifiche sono disattivate nelle impostazioni."
 }

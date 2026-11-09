@@ -10,6 +10,7 @@ import '../../core/models/subscription.dart';
 import '../../core/providers.dart';
 import '../../core/theme.dart';
 import '../audio/voice_controller.dart';
+import '../notifications/reminder_service.dart';
 import '../audio/voice_settings.dart';
 import '../dashboard/dashboard_controller.dart' show paymentsRepositoryProvider;
 import '../practice/practice_controller.dart' show exercisesRepositoryProvider;
@@ -181,6 +182,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const _InterfaceLanguage(),
 
                 const SizedBox(height: 24),
+                const _ReminderSetting(),
+
+                const SizedBox(height: 24),
                 const _AppearanceSetting(),
 
                 const SizedBox(height: 24),
@@ -330,6 +334,98 @@ class _InterfaceLanguage extends ConsumerWidget {
 }
 
 /// Theme choice: follow the system, or force light / dark.
+/// The daily study reminder: on or off, and at what time.
+///
+/// Kept on the device rather than on the account, because the notification is
+/// local — the phone schedules it, so the phone is where the choice belongs. A
+/// second device gets its own.
+class _ReminderSetting extends ConsumerStatefulWidget {
+  const _ReminderSetting();
+
+  @override
+  ConsumerState<_ReminderSetting> createState() => _ReminderSettingState();
+}
+
+class _ReminderSettingState extends ConsumerState<_ReminderSetting> {
+  bool _enabled = false;
+  TimeOfDay _at = ReminderService.defaultTime;
+  bool _loaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _read();
+  }
+
+  Future<void> _read() async {
+    final setting = await ref.read(reminderServiceProvider).load();
+    if (!mounted) return;
+    setState(() {
+      _enabled = setting.enabled;
+      _at = setting.at;
+      _loaded = true;
+    });
+  }
+
+  Future<void> _toggle(bool on) async {
+    final service = ref.read(reminderServiceProvider);
+    if (!on) {
+      await service.disable();
+      if (mounted) setState(() => _enabled = false);
+      return;
+    }
+    // The system can say no, and saying nothing then would leave a switch that
+    // looks on and never fires.
+    final granted = await service.enable(_at);
+    if (!mounted) return;
+    setState(() => _enabled = granted);
+    if (!granted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(t('settings.reminder_denied'))));
+    }
+  }
+
+  Future<void> _pickTime() async {
+    final picked = await showTimePicker(context: context, initialTime: _at);
+    if (picked == null || !mounted) return;
+    setState(() => _at = picked);
+    if (_enabled) await ref.read(reminderServiceProvider).enable(picked);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_loaded) return const SizedBox.shrink();
+    // Web has no local notifications; offering the switch there would be a lie.
+    if (kIsWeb) return const SizedBox.shrink();
+
+    final at = _at.format(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(t('settings.reminder'),
+            style: Theme.of(context).textTheme.titleMedium),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          value: _enabled,
+          onChanged: _toggle,
+          title: Text(_enabled
+              ? t('settings.reminder_at', {'time': at})
+              : t('settings.reminder_off')),
+          subtitle: Text(t('reminder.channel_desc')),
+        ),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: OutlinedButton.icon(
+            onPressed: _pickTime,
+            icon: const Icon(Icons.schedule),
+            label: Text(at),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _AppearanceSetting extends ConsumerWidget {
   const _AppearanceSetting();
 

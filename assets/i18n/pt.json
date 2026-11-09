@@ -295,5 +295,20 @@
   "verify.unlock": "Confirme o email para desbloquear a prática.",
   "verify.resend_short": "Reenviar",
   "verify.sent": "Email de verificação enviado.",
-  "settings.could_not_save": "Não foi possível guardar a definição."
+  "settings.could_not_save": "Não foi possível guardar a definição.",
+  "playlist.understood": "{n}% compreendido",
+  "dash.streak": "dias seguidos",
+  "dash.streak_best": "recorde",
+  "dash.streak_today_done": "Feito por hoje — muito bem.",
+  "dash.streak_keep_going": "Pratique hoje para manter.",
+  "dash.streak_last_chance": "Hoje é o último dia para manter a sequência.",
+  "dash.streak_none": "Pratique hoje para começar uma sequência.",
+  "reminder.title": "Hora de praticar",
+  "reminder.body": "Alguns minutos mantêm a tua sequência.",
+  "reminder.channel": "Lembretes de estudo",
+  "reminder.channel_desc": "Um aviso diário à hora que escolheres.",
+  "settings.reminder": "Lembrete diário",
+  "settings.reminder_off": "Desligado",
+  "settings.reminder_at": "Todos os dias às {time}",
+  "settings.reminder_denied": "As notificações estão desligadas nas definições."
 }

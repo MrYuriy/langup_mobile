@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/i18n.dart';
 import '../../core/mastery.dart';
+import '../../core/models/streak.dart';
 import 'dashboard_controller.dart';
 
 class DashboardScreen extends ConsumerWidget {
@@ -22,6 +23,10 @@ class DashboardScreen extends ConsumerWidget {
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
+                  if (state.streak != null) ...[
+                    _StreakCard(streak: state.streak!),
+                    const SizedBox(height: 16),
+                  ],
                   _statGrid(context, state),
                   const SizedBox(height: 24),
                   _MasterySection(state: state),
@@ -196,4 +201,85 @@ class _PlanCard extends StatelessWidget {
 
   String _date(DateTime d) =>
       '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+}
+
+
+/// The practice run, given the top of the screen because it is the one number
+/// a learner checks daily.
+///
+/// Forgiving on purpose — "skip a day, but not two" — so the card never says
+/// the run is over while there is still time today. The longest run sits beside
+/// the current one: what was earned stays earned, which is what makes a lapse
+/// survivable rather than a reason to stop.
+class _StreakCard extends StatelessWidget {
+  const _StreakCard({required this.streak});
+
+  final Streak streak;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final urgent = streak.atRisk && streak.current > 0;
+    final note = streak.current == 0
+        ? t('dash.streak_none')
+        : streak.practisedToday
+            ? t('dash.streak_today_done')
+            : urgent
+                ? t('dash.streak_last_chance')
+                : t('dash.streak_keep_going');
+
+    return Card(
+      margin: EdgeInsets.zero,
+      color: urgent ? scheme.errorContainer : scheme.primaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Icon(
+              streak.practisedToday ? Icons.local_fire_department : Icons.local_fire_department_outlined,
+              size: 40,
+              color: urgent ? scheme.onErrorContainer : scheme.primary,
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text('${streak.current}',
+                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              )),
+                      const SizedBox(width: 8),
+                      // The label carries the word, so the number never has to
+                      // agree with it — Ukrainian and Polish would need three
+                      // plural forms the translation files cannot express.
+                      Text(t('dash.streak'),
+                          style: Theme.of(context).textTheme.titleMedium),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(note, style: Theme.of(context).textTheme.bodySmall),
+                ],
+              ),
+            ),
+            if (streak.longest > 0)
+              Column(
+                children: [
+                  Text('${streak.longest}',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          )),
+                  Text(t('dash.streak_best'),
+                      style: Theme.of(context).textTheme.labelSmall),
+                ],
+              ),
+          ],
+        ),
+      ),
+    );
+  }
 }

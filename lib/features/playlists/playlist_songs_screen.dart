@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/i18n.dart';
 import '../../core/languages.dart';
 import '../../core/models/playlist.dart';
+import 'comprehension_bar.dart';
 import 'playlists_controller.dart';
 
 final _detailProvider =
@@ -62,6 +63,12 @@ class _PlaylistSongsScreenState extends ConsumerState<PlaylistSongsScreen> {
                   ),
                 ),
               ),
+              if (d.comprehension != null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                  child: ComprehensionBar(
+                      percent: d.comprehension!, prominent: true),
+                ),
               Expanded(
                 child: songs.isEmpty
                     ? Center(
@@ -90,15 +97,24 @@ class _SongTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       title: Text(song.title, maxLines: 1, overflow: TextOverflow.ellipsis),
-      subtitle: Row(
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Flexible(
-            child: Text(song.artist,
-                maxLines: 1, overflow: TextOverflow.ellipsis),
+          Row(
+            children: [
+              Flexible(
+                child: Text(song.artist,
+                    maxLines: 1, overflow: TextOverflow.ellipsis),
+              ),
+              if (song.language != null) ...[
+                const SizedBox(width: 8),
+                _Badge(languageName(song.language)),
+              ],
+            ],
           ),
-          if (song.language != null) ...[
-            const SizedBox(width: 8),
-            _Badge(languageName(song.language)),
+          if (song.comprehension != null) ...[
+            const SizedBox(height: 6),
+            ComprehensionBar(percent: song.comprehension!),
           ],
         ],
       ),

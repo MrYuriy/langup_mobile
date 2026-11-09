@@ -33,6 +33,11 @@ class _LangUpAppState extends ConsumerState<LangUpApp> {
     Future.microtask(
       () => ref.read(authControllerProvider.notifier).bootstrap(),
     );
+    // Re-arm the daily reminder from what the learner chose. The notification
+    // text is baked in when it is scheduled, so this also picks up a changed
+    // interface language, and it covers a reboot the plugin's own receiver
+    // somehow missed. Never awaited — a reminder must not delay the first frame.
+    Future.microtask(() => ref.read(reminderServiceProvider).reapply());
   }
 
   @override

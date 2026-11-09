@@ -295,5 +295,20 @@
   "verify.unlock": "Bestätige deine E-Mail, um Übungen freizuschalten.",
   "verify.resend_short": "Erneut senden",
   "verify.sent": "Bestätigungs-E-Mail gesendet.",
-  "settings.could_not_save": "Einstellung konnte nicht gespeichert werden."
+  "settings.could_not_save": "Einstellung konnte nicht gespeichert werden.",
+  "playlist.understood": "{n}% verstanden",
+  "dash.streak": "Tage in Folge",
+  "dash.streak_best": "Bestwert",
+  "dash.streak_today_done": "Heute geschafft — gut gemacht.",
+  "dash.streak_keep_going": "Heute üben, um sie zu halten.",
+  "dash.streak_last_chance": "Heute die letzte Chance für die Serie.",
+  "dash.streak_none": "Übe heute, um eine Serie zu starten.",
+  "reminder.title": "Zeit zum Üben",
+  "reminder.body": "Ein paar Minuten halten deine Serie.",
+  "reminder.channel": "Lernerinnerungen",
+  "reminder.channel_desc": "Ein täglicher Hinweis zur gewählten Zeit.",
+  "settings.reminder": "Tägliche Erinnerung",
+  "settings.reminder_off": "Aus",
+  "settings.reminder_at": "Täglich um {time}",
+  "settings.reminder_denied": "Benachrichtigungen sind in den Systemeinstellungen aus."
 }

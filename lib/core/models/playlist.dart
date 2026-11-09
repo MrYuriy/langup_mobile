@@ -29,6 +29,8 @@ class PlaylistSong {
     required this.language,
     required this.unknownCount,
     required this.inLearnedLanguage,
+    this.comprehension,
+    this.totalLemmas,
   });
 
   final String songUuid;
@@ -38,12 +40,21 @@ class PlaylistSong {
   final int? unknownCount;
   final bool inLearnedLanguage;
 
+  /// Share of the song's words the learner already has, 0-100. Null until the
+  /// song has been analysed.
+  final int? comprehension;
+
+  /// Content words in the song — the denominator behind [comprehension].
+  final int? totalLemmas;
+
   factory PlaylistSong.fromJson(Map<String, dynamic> json) => PlaylistSong(
         songUuid: json['song_uuid'] as String,
         title: json['title'] as String,
         artist: json['artist'] as String? ?? '',
         language: json['language'] as String?,
         unknownCount: json['unknown_count'] as int?,
+        comprehension: json['comprehension'] as int?,
+        totalLemmas: json['total_lemmas'] as int?,
         inLearnedLanguage: json['in_learned_language'] as bool? ?? false,
       );
 }
@@ -55,12 +66,17 @@ class PlaylistDetail {
     required this.name,
     required this.status,
     required this.songs,
+    this.comprehension,
   });
 
   final String uuid;
   final String? name;
   final String status;
   final List<PlaylistSong> songs;
+
+  /// The whole playlist, weighted by song length rather than a mean of the
+  /// per-song figures. Null until something in it has been analysed.
+  final int? comprehension;
 
   factory PlaylistDetail.fromJson(Map<String, dynamic> json) => PlaylistDetail(
         uuid: json['uuid'] as String,
@@ -70,6 +86,7 @@ class PlaylistDetail {
           for (final s in (json['songs'] as List? ?? []))
             PlaylistSong.fromJson((s as Map).cast<String, dynamic>()),
         ],
+        comprehension: json['comprehension'] as int?,
       );
 }
 

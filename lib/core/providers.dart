@@ -3,10 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../features/auth/auth_controller.dart';
 import '../features/auth/auth_repository.dart';
 import '../features/auth/google_auth_service.dart';
+import '../features/notifications/reminder_service.dart';
 import 'api_client.dart';
 import 'token_store.dart';
 
 final tokenStoreProvider = Provider<TokenStore>((ref) => TokenStore());
+
+final reminderServiceProvider = Provider<ReminderService>((ref) => ReminderService());
 
 final apiClientProvider = Provider<ApiClient>((ref) {
   return ApiClient(ref.watch(tokenStoreProvider));

@@ -295,5 +295,20 @@
   "verify.unlock": "Confirmez votre e-mail pour débloquer la pratique.",
   "verify.resend_short": "Renvoyer",
   "verify.sent": "E-mail de vérification envoyé.",
-  "settings.could_not_save": "Impossible d'enregistrer le réglage."
+  "settings.could_not_save": "Impossible d'enregistrer le réglage.",
+  "playlist.understood": "{n}% compris",
+  "dash.streak": "jours d'affilée",
+  "dash.streak_best": "record",
+  "dash.streak_today_done": "C'est fait pour aujourd'hui.",
+  "dash.streak_keep_going": "Pratiquez aujourd'hui pour la garder.",
+  "dash.streak_last_chance": "Dernier jour pour garder la série.",
+  "dash.streak_none": "Pratiquez aujourd'hui pour lancer une série.",
+  "reminder.title": "C'est l'heure de pratiquer",
+  "reminder.body": "Quelques minutes suffisent pour garder la série.",
+  "reminder.channel": "Rappels d'étude",
+  "reminder.channel_desc": "Un rappel quotidien à l'heure choisie.",
+  "settings.reminder": "Rappel quotidien",
+  "settings.reminder_off": "Désactivé",
+  "settings.reminder_at": "Chaque jour à {time}",
+  "settings.reminder_denied": "Les notifications sont désactivées dans les réglages."
 }

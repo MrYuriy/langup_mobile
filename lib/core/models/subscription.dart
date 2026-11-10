@@ -6,6 +6,7 @@ class Subscription {
     required this.isActive,
     required this.currentPeriodEnd,
     required this.cancelAtPeriodEnd,
+    required this.isManaged,
   });
 
   final String status; // e.g. TRIALING, ACTIVE, NONE
@@ -13,6 +14,11 @@ class Subscription {
   final bool isActive;
   final DateTime? currentPeriodEnd;
   final bool cancelAtPeriodEnd;
+
+  /// Whether Stripe has anything to manage. The free trial we grant on sign-up
+  /// is active but has no Stripe subscription behind it, so opening the billing
+  /// portal for it can only fail — offer an upgrade instead.
+  final bool isManaged;
 
   bool get isTrial => status == 'TRIALING' && isActive;
 
@@ -31,5 +37,8 @@ class Subscription {
             ? DateTime.tryParse(json['current_period_end'] as String)
             : null,
         cancelAtPeriodEnd: json['cancel_at_period_end'] as bool? ?? false,
+        // Defaults to false against an older server: a missing Manage button
+        // is a smaller harm than one that dies on a 400.
+        isManaged: json['is_managed'] as bool? ?? false,
       );
 }

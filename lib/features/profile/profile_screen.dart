@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -252,11 +253,18 @@ class _PlanSection extends ConsumerWidget {
     try {
       final target = await url;
       await launchUrl(Uri.parse(target), mode: LaunchMode.externalApplication);
-    } catch (_) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(t('auth.could_not_open'))));
-      }
+    } catch (e) {
+      if (!context.mounted) return;
+      // Show what the server said when it said anything. The bare "could not
+      // open the page" was the same message whether billing was misconfigured,
+      // the account had nothing to manage, or the device had no browser — and
+      // it cost a round of guessing to tell those apart.
+      final detail = e is DioException ? (e.response?.data is Map
+              ? (e.response!.data as Map)['detail']?.toString()
+              : null)
+          : null;
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(detail ?? t('auth.could_not_open'))));
     }
   }
 
@@ -283,9 +291,15 @@ class _PlanSection extends ConsumerWidget {
               child: ListTile(
                 leading: const Icon(Icons.card_membership),
                 title: Text(label),
+                // "Manage" opens Stripe's billing portal, which can only
+                // exist for a subscription Stripe knows about. The trial we
+                // grant on sign-up is active but entirely ours, so it got a
+                // Manage button that could only ever fail. A trialist is
+                // offered the upgrade instead — the action that is actually
+                // open to them before the trial runs out.
                 trailing: _hidePayments
                     ? null
-                    : (active
+                    : (active && s!.isManaged
                         ? TextButton(
                             onPressed: () =>
                                 _open(context, ref, repo.portalUrl()),

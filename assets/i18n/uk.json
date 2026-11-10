@@ -310,5 +310,14 @@
   "settings.reminder": "Щоденне нагадування",
   "settings.reminder_off": "Вимкнено",
   "settings.reminder_at": "Щодня о {time}",
-  "settings.reminder_denied": "Сповіщення вимкнені в налаштуваннях системи."
+  "settings.reminder_denied": "Сповіщення вимкнені в налаштуваннях системи.",
+  "checkout.confirming": "Підтверджуємо оплату",
+  "checkout.confirming_note": "Це займе мить.",
+  "checkout.done": "Преміум активовано",
+  "checkout.done_note": "Усе відкрито.",
+  "checkout.slow": "Оплату отримано",
+  "checkout.slow_note": "Тариф оновиться за хвилину.",
+  "checkout.cancelled": "Оплату скасовано",
+  "checkout.cancelled_note": "Нічого не списано.",
+  "checkout.continue": "Продовжити"
 }

@@ -310,5 +310,14 @@
   "settings.reminder": "Promemoria giornaliero",
   "settings.reminder_off": "Disattivato",
   "settings.reminder_at": "Ogni giorno alle {time}",
-  "settings.reminder_denied": "Le notifiche sono disattivate nelle impostazioni."
+  "settings.reminder_denied": "Le notifiche sono disattivate nelle impostazioni.",
+  "checkout.confirming": "Confermiamo il pagamento",
+  "checkout.confirming_note": "Ci vuole un attimo.",
+  "checkout.done": "Premium attivo",
+  "checkout.done_note": "Tutto sbloccato.",
+  "checkout.slow": "Pagamento ricevuto",
+  "checkout.slow_note": "Il piano si aggiornerà a breve.",
+  "checkout.cancelled": "Pagamento annullato",
+  "checkout.cancelled_note": "Non è stato addebitato nulla.",
+  "checkout.continue": "Continua"
 }

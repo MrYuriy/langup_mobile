@@ -310,5 +310,14 @@
   "settings.reminder": "Lembrete diário",
   "settings.reminder_off": "Desligado",
   "settings.reminder_at": "Todos os dias às {time}",
-  "settings.reminder_denied": "As notificações estão desligadas nas definições."
+  "settings.reminder_denied": "As notificações estão desligadas nas definições.",
+  "checkout.confirming": "A confirmar o pagamento",
+  "checkout.confirming_note": "Demora um instante.",
+  "checkout.done": "Premium ativo",
+  "checkout.done_note": "Tudo desbloqueado.",
+  "checkout.slow": "Pagamento recebido",
+  "checkout.slow_note": "O teu plano será atualizado em breve.",
+  "checkout.cancelled": "Pagamento cancelado",
+  "checkout.cancelled_note": "Não foi cobrado nada.",
+  "checkout.continue": "Continuar"
 }

@@ -310,5 +310,14 @@
   "settings.reminder": "Daily reminder",
   "settings.reminder_off": "Off",
   "settings.reminder_at": "Every day at {time}",
-  "settings.reminder_denied": "Notifications are turned off in system settings."
+  "settings.reminder_denied": "Notifications are turned off in system settings.",
+  "checkout.confirming": "Confirming your payment",
+  "checkout.confirming_note": "This takes a moment.",
+  "checkout.done": "You're premium",
+  "checkout.done_note": "Everything is unlocked.",
+  "checkout.slow": "Payment received",
+  "checkout.slow_note": "Your plan will update shortly.",
+  "checkout.cancelled": "Checkout cancelled",
+  "checkout.cancelled_note": "Nothing was charged.",
+  "checkout.continue": "Continue"
 }

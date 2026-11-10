@@ -310,5 +310,14 @@
   "settings.reminder": "Rappel quotidien",
   "settings.reminder_off": "Désactivé",
   "settings.reminder_at": "Chaque jour à {time}",
-  "settings.reminder_denied": "Les notifications sont désactivées dans les réglages."
+  "settings.reminder_denied": "Les notifications sont désactivées dans les réglages.",
+  "checkout.confirming": "Confirmation du paiement",
+  "checkout.confirming_note": "Cela prend un instant.",
+  "checkout.done": "Premium activé",
+  "checkout.done_note": "Tout est débloqué.",
+  "checkout.slow": "Paiement reçu",
+  "checkout.slow_note": "Votre offre sera mise à jour sous peu.",
+  "checkout.cancelled": "Paiement annulé",
+  "checkout.cancelled_note": "Rien n'a été débité.",
+  "checkout.continue": "Continuer"
 }

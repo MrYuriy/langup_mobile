@@ -33,6 +33,36 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+
+            <!-- Coming back from Stripe. Checkout only accepts http(s) in its
+                 success_url, so it is pointed at our own /app/checkout/... and
+                 Android is told those URLs belong to this app. Verified
+                 against /.well-known/assetlinks.json on the host, which the
+                 backend serves from the signing certificate's SHA-256. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data
+                    android:scheme="https"
+                    android:host="langup.piatek-magazyn.com"
+                    android:pathPrefix="/app/checkout"/>
+            </intent-filter>
+
+            <!-- The fallback the bridge page uses when verification does not
+                 apply: an older Android, a build signed with another key. An
+                 empty host keeps the path identical to the https link, so the
+                 router needs one route rather than two. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="langup"/>
+            </intent-filter>
+
+            <!-- Hands the incoming URI to the Flutter router instead of just
+                 bringing the app to the foreground on whatever screen it left. -->
+            <meta-data android:name="flutter_deeplinking_enabled" android:value="true"/>
         </activity>
         <!-- flutter_local_notifications: re-arms the scheduled reminder after a
              reboot or an app update, and delivers it when it fires. -->

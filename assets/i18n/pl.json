@@ -310,5 +310,14 @@
   "settings.reminder": "Codzienne przypomnienie",
   "settings.reminder_off": "Wyłączone",
   "settings.reminder_at": "Codziennie o {time}",
-  "settings.reminder_denied": "Powiadomienia są wyłączone w ustawieniach systemu."
+  "settings.reminder_denied": "Powiadomienia są wyłączone w ustawieniach systemu.",
+  "checkout.confirming": "Potwierdzamy płatność",
+  "checkout.confirming_note": "To chwilę potrwa.",
+  "checkout.done": "Masz premium",
+  "checkout.done_note": "Wszystko odblokowane.",
+  "checkout.slow": "Płatność otrzymana",
+  "checkout.slow_note": "Plan zaktualizuje się wkrótce.",
+  "checkout.cancelled": "Płatność anulowana",
+  "checkout.cancelled_note": "Nic nie pobrano.",
+  "checkout.continue": "Dalej"
 }

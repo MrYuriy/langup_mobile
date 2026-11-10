@@ -7,6 +7,7 @@ import '../features/auth/language_gate_screen.dart';
 import '../features/auth/login_screen.dart';
 import '../features/auth/splash_screen.dart';
 import '../features/dashboard/dashboard_screen.dart';
+import '../features/payments/checkout_return_screen.dart';
 import '../features/playlists/lyrics_reader_screen.dart';
 import '../features/playlists/playlist_songs_screen.dart';
 import '../features/playlists/playlists_screen.dart';
@@ -31,6 +32,10 @@ class _AuthRefresh extends ChangeNotifier {
 
 /// Locations reachable once signed in (shell branches + full-screen pushes).
 const _authedPrefixes = [
+  // Where Stripe sends a customer back. Must be reachable, or the redirect
+  // below would bounce a paying customer to /words and the screen that waits
+  // for the subscription would never be shown.
+  '/app/checkout',
   '/words',
   '/playlists',
   '/practice',
@@ -50,6 +55,15 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(path: '/splash', builder: (_, _) => const SplashScreen()),
       GoRoute(path: '/login', builder: (_, _) => const LoginScreen()),
+
+      // Deep link target for a finished Stripe checkout. The same path serves
+      // the App Link (https://host/app/checkout/...) and the scheme fallback
+      // (langup:///app/checkout/...), which is why the latter has no host.
+      GoRoute(
+        path: '/app/checkout/:outcome',
+        builder: (_, state) =>
+            CheckoutReturnScreen(outcome: state.pathParameters['outcome'] ?? 'success'),
+      ),
       GoRoute(path: '/language', builder: (_, _) => const LanguageGateScreen()),
 
       // Full-screen word detail (pushed over the shell).

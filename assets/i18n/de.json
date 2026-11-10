@@ -310,5 +310,14 @@
   "settings.reminder": "Tägliche Erinnerung",
   "settings.reminder_off": "Aus",
   "settings.reminder_at": "Täglich um {time}",
-  "settings.reminder_denied": "Benachrichtigungen sind in den Systemeinstellungen aus."
+  "settings.reminder_denied": "Benachrichtigungen sind in den Systemeinstellungen aus.",
+  "checkout.confirming": "Zahlung wird bestätigt",
+  "checkout.confirming_note": "Das dauert einen Moment.",
+  "checkout.done": "Premium aktiv",
+  "checkout.done_note": "Alles freigeschaltet.",
+  "checkout.slow": "Zahlung erhalten",
+  "checkout.slow_note": "Dein Tarif wird gleich aktualisiert.",
+  "checkout.cancelled": "Bezahlung abgebrochen",
+  "checkout.cancelled_note": "Es wurde nichts abgebucht.",
+  "checkout.continue": "Weiter"
 }

@@ -310,5 +310,14 @@
   "settings.reminder": "Recordatorio diario",
   "settings.reminder_off": "Desactivado",
   "settings.reminder_at": "Todos los días a las {time}",
-  "settings.reminder_denied": "Las notificaciones están desactivadas en los ajustes."
+  "settings.reminder_denied": "Las notificaciones están desactivadas en los ajustes.",
+  "checkout.confirming": "Confirmando tu pago",
+  "checkout.confirming_note": "Tarda un momento.",
+  "checkout.done": "Ya tienes premium",
+  "checkout.done_note": "Todo desbloqueado.",
+  "checkout.slow": "Pago recibido",
+  "checkout.slow_note": "Tu plan se actualizará en breve.",
+  "checkout.cancelled": "Pago cancelado",
+  "checkout.cancelled_note": "No se cobró nada.",
+  "checkout.continue": "Continuar"
 }
